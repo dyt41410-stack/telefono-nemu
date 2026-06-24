@@ -10,7 +10,6 @@
     :root {
       --bg: #0f0f1a;
       --card: #1a1a2e;
-      --card2: #16213e;
       --accent: #7c3aed;
       --accent2: #a78bfa;
       --green: #22c55e;
@@ -31,11 +30,9 @@
       padding: 16px;
     }
 
-    /* ── SCREENS ── */
     .screen { display: none; width: 100%; max-width: 420px; }
     .screen.active { display: flex; flex-direction: column; gap: 20px; }
 
-    /* ── AUTH ── */
     .logo-wrap { text-align: center; }
     .logo-wrap .emoji { font-size: 3.5rem; }
     .logo-wrap h1 { font-size: 1.6rem; font-weight: 800; margin-top: 8px; }
@@ -50,7 +47,6 @@
       flex-direction: column;
       gap: 14px;
     }
-
     .card h2 { font-size: 1.1rem; font-weight: 700; }
 
     .field { display: flex; flex-direction: column; gap: 6px; }
@@ -69,216 +65,123 @@
     .field input::placeholder { color: rgba(255,255,255,0.2); }
 
     .btn {
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 700;
-      padding: 14px;
-      transition: opacity 0.15s, transform 0.08s;
-      width: 100%;
+      border: none; border-radius: 50px; cursor: pointer;
+      font-size: 1rem; font-weight: 700; padding: 14px;
+      transition: opacity 0.15s, transform 0.08s; width: 100%;
     }
     .btn:active { transform: scale(0.97); opacity: 0.85; }
     .btn-primary { background: var(--accent); color: #fff; }
-    .btn-secondary { background: rgba(255,255,255,0.07); color: var(--text); }
     .btn-green { background: var(--green); color: #fff; }
     .btn-red { background: var(--red); color: #fff; }
+    .btn-gray { background: rgba(255,255,255,0.07); color: var(--text); }
 
-    .toggle-link {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
+    .toggle-link { text-align: center; font-size: 0.85rem; color: var(--muted); }
     .toggle-link span { color: var(--accent2); cursor: pointer; text-decoration: underline; }
 
-    .error-msg {
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 10px;
-      color: #fca5a5;
-      font-size: 0.85rem;
-      padding: 10px 14px;
-      display: none;
+    .msg {
+      border-radius: 10px; font-size: 0.85rem; padding: 10px 14px; display: none;
     }
+    .msg-err { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .msg-ok  { background: rgba(34,197,94,0.15);  border: 1px solid rgba(34,197,94,0.3);  color: #86efac; }
+    .msg-warn{ background: rgba(234,179,8,0.15);  border: 1px solid rgba(234,179,8,0.3);  color: #fde047; }
 
-    /* ── HOME ── */
+    /* TOP BAR */
     .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 14px 18px;
     }
     .top-bar .user-info { display: flex; flex-direction: column; }
     .top-bar .user-name { font-weight: 700; font-size: 1rem; }
     .top-bar .user-num { color: var(--accent2); font-size: 0.85rem; font-weight: 600; }
-    .top-bar .logout-btn {
-      background: rgba(255,255,255,0.07);
-      border: none;
-      border-radius: 10px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.8rem;
-      padding: 6px 12px;
+    .top-bar .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; display: inline-block; margin-right: 4px; }
+    .top-bar .conn-dot.online { background: var(--green); }
+    .logout-btn {
+      background: rgba(255,255,255,0.07); border: none; border-radius: 10px;
+      color: var(--muted); cursor: pointer; font-size: 0.8rem; padding: 6px 12px;
     }
 
-    .dial-card { gap: 18px; }
-    .dial-card h2 { font-size: 1rem; color: var(--muted); font-weight: 500; }
-
-    .number-input-wrap {
-      display: flex;
-      gap: 10px;
-    }
+    /* DIAL */
+    .call-btn-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .number-input-wrap input {
-      flex: 1;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      font-size: 1.3rem;
-      letter-spacing: 3px;
-      padding: 14px 16px;
-      outline: none;
+      width: 100%;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text); font-size: 1.3rem;
+      letter-spacing: 3px; padding: 14px 16px; outline: none;
       transition: border-color 0.2s;
     }
     .number-input-wrap input:focus { border-color: var(--accent2); }
     .number-input-wrap input::placeholder { font-size: 0.9rem; letter-spacing: 0; color: rgba(255,255,255,0.2); }
 
-    .call-btn-wrap {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    /* PERMISSION BANNER */
+    .perm-banner {
+      background: rgba(234,179,8,0.12); border: 1px solid rgba(234,179,8,0.3);
+      border-radius: 14px; padding: 14px 16px;
+      font-size: 0.85rem; color: #fde047; line-height: 1.5;
+      display: none;
     }
 
-    /* ── CALL SCREEN ── */
-    .call-screen-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-    }
-
+    /* CALL SCREEN */
     .videos-wrap {
-      position: relative;
-      width: 100%;
-      border-radius: 24px;
-      overflow: hidden;
-      background: #000;
-      aspect-ratio: 9/16;
-      max-height: 60vh;
+      position: relative; width: 100%; border-radius: 24px;
+      overflow: hidden; background: #000; aspect-ratio: 9/16; max-height: 60vh;
     }
-
-    #remoteVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
+    #remoteVideo { width: 100%; height: 100%; object-fit: cover; display: block; }
     #localVideo {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      width: 90px;
-      height: 120px;
-      border-radius: 14px;
-      object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.3);
+      position: absolute; bottom: 12px; right: 12px;
+      width: 90px; height: 120px; border-radius: 14px;
+      object-fit: cover; border: 2px solid rgba(255,255,255,0.3);
     }
 
     .filter-bar {
-      display: flex;
-      gap: 8px;
-      padding: 12px 0;
-      overflow-x: auto;
-      width: 100%;
-      scrollbar-width: none;
+      display: flex; gap: 8px; padding: 12px 0;
+      overflow-x: auto; width: 100%; scrollbar-width: none;
     }
     .filter-bar::-webkit-scrollbar { display: none; }
-
     .filter-pill {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      color: var(--text);
-      cursor: pointer;
-      flex-shrink: 0;
-      font-size: 0.82rem;
-      padding: 7px 14px;
-      transition: background 0.15s;
-      white-space: nowrap;
+      background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+      border-radius: 50px; color: var(--text); cursor: pointer;
+      flex-shrink: 0; font-size: 0.82rem; padding: 7px 14px;
+      transition: background 0.15s; white-space: nowrap;
     }
-    .filter-pill.active, .filter-pill:active { background: var(--accent); border-color: var(--accent); }
+    .filter-pill.active { background: var(--accent); border-color: var(--accent); }
 
     .call-controls {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      padding: 8px 0;
-      flex-wrap: wrap;
+      display: flex; gap: 14px; justify-content: center;
+      padding: 8px 0; flex-wrap: wrap;
     }
-
     .ctrl-btn {
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      width: 56px;
-      height: 56px;
-      font-size: 1.3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.08s, opacity 0.15s;
+      border: none; border-radius: 50%; cursor: pointer;
+      width: 56px; height: 56px; font-size: 1.3rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.08s;
     }
     .ctrl-btn:active { transform: scale(0.92); }
     .ctrl-btn.mute { background: rgba(255,255,255,0.1); }
-    .ctrl-btn.cam { background: rgba(255,255,255,0.1); }
+    .ctrl-btn.cam  { background: rgba(255,255,255,0.1); }
     .ctrl-btn.hangup { background: var(--red); width: 68px; height: 68px; font-size: 1.6rem; }
 
-    .call-status {
-      color: var(--muted);
-      font-size: 0.9rem;
-      text-align: center;
-      padding: 4px 0;
-    }
+    .call-status { color: var(--muted); font-size: 0.9rem; text-align: center; padding: 4px 0; }
 
-    /* ── INCOMING ── */
-    .incoming-card {
-      align-items: center;
-      text-align: center;
-      gap: 16px;
-    }
-    .incoming-card .avatar {
-      font-size: 4rem;
-      line-height: 1;
-    }
-    .incoming-card h2 { font-size: 1.1rem; color: var(--muted); }
+    /* INCOMING */
+    .incoming-card { align-items: center; text-align: center; gap: 16px; }
+    .incoming-card .avatar { font-size: 4rem; line-height: 1; }
     .incoming-card .caller { font-size: 2rem; font-weight: 800; color: var(--accent2); }
     .incoming-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
-
-    /* ── CANVAS FILTER ── */
-    canvas { display: none; }
-
-    @media (max-width: 380px) {
-      .call-btn-wrap { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 <body>
 
-<!-- ══ AUTH SCREEN ══ -->
+<!-- AUTH -->
 <div class="screen active" id="authScreen">
   <div class="logo-wrap">
     <div class="emoji">📞</div>
     <h1>Teléfono de Ñemu</h1>
     <p>Llamadas y video gratis desde el navegador</p>
   </div>
-
   <div class="card" id="loginCard">
     <h2>Iniciar sesión</h2>
-    <div class="error-msg" id="loginError"></div>
+    <div class="msg msg-err" id="loginError"></div>
     <div class="field">
       <label>Tu número</label>
       <input type="tel" id="loginNum" placeholder="ej: 1001" inputmode="numeric">
@@ -287,28 +190,27 @@
       <label>Contraseña</label>
       <input type="password" id="loginPass" placeholder="••••••">
     </div>
-    <button class="btn btn-primary" onclick="login()">Entrar</button>
+    <button class="btn btn-primary" id="loginBtn" onclick="login()">Entrar</button>
     <div class="toggle-link">¿No tienes cuenta? <span onclick="showRegister()">Regístrate</span></div>
   </div>
 </div>
 
-<!-- ══ REGISTER SCREEN ══ -->
+<!-- REGISTER -->
 <div class="screen" id="registerScreen">
   <div class="logo-wrap">
     <div class="emoji">📞</div>
     <h1>Teléfono de Ñemu</h1>
     <p>Crea tu cuenta gratis</p>
   </div>
-
   <div class="card">
     <h2>Crear cuenta</h2>
-    <div class="error-msg" id="registerError"></div>
+    <div class="msg msg-err" id="registerError"></div>
     <div class="field">
       <label>Tu nombre</label>
       <input type="text" id="regName" placeholder="ej: Daniel">
     </div>
     <div class="field">
-      <label>Elige un número</label>
+      <label>Elige un número (solo dígitos)</label>
       <input type="tel" id="regNum" placeholder="ej: 1001" inputmode="numeric">
     </div>
     <div class="field">
@@ -320,18 +222,27 @@
   </div>
 </div>
 
-<!-- ══ HOME SCREEN ══ -->
+<!-- HOME -->
 <div class="screen" id="homeScreen">
   <div class="top-bar">
     <div class="user-info">
       <span class="user-name" id="displayName">—</span>
-      <span class="user-num" id="displayNum">—</span>
+      <span class="user-num">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="displayNum">—</span>
+      </span>
     </div>
     <button class="logout-btn" onclick="logout()">Salir</button>
   </div>
 
-  <div class="card dial-card">
-    <h2>Marca un número para llamar</h2>
+  <!-- Permission banner -->
+  <div class="perm-banner" id="permBanner">
+    ⚠️ <strong>Permisos necesarios:</strong> Para llamar necesitas permitir el acceso a la cámara y micrófono cuando el navegador lo pida. Toca "Llamar" y acepta los permisos.
+  </div>
+
+  <div class="card" style="gap:18px;">
+    <h2 style="font-size:1rem; color:var(--muted); font-weight:500;">Marca un número para llamar</h2>
+    <div class="msg msg-err" id="callError"></div>
     <div class="number-input-wrap">
       <input type="tel" id="dialInput" placeholder="Número del destinatario" inputmode="numeric">
     </div>
@@ -342,17 +253,16 @@
   </div>
 
   <div class="card" style="gap:8px;">
-    <h2 style="font-size:0.85rem; color:var(--muted);">Tu número para compartir</h2>
+    <h2 style="font-size:0.85rem; color:var(--muted);">Tu número — compártelo para que te llamen</h2>
     <div style="font-size:1.8rem; font-weight:800; color:var(--accent2); letter-spacing:4px;" id="myNumBig">—</div>
-    <div style="font-size:0.8rem; color:var(--muted);">Comparte este número con quien quieras que te llame</div>
   </div>
 </div>
 
-<!-- ══ INCOMING SCREEN ══ -->
+<!-- INCOMING -->
 <div class="screen" id="incomingScreen">
   <div class="card incoming-card">
     <div class="avatar">📲</div>
-    <h2>Llamada entrante</h2>
+    <h2>Llamada entrante de</h2>
     <div class="caller" id="callerNum">—</div>
     <div class="incoming-btns">
       <button class="btn btn-red" onclick="rejectCall()">❌ Rechazar</button>
@@ -361,40 +271,39 @@
   </div>
 </div>
 
-<!-- ══ CALL SCREEN ══ -->
+<!-- CALL -->
 <div class="screen" id="callScreen">
-  <div class="call-screen-inner">
+  <div style="display:flex; flex-direction:column; align-items:center; gap:0; width:100%;">
     <div class="videos-wrap">
       <video id="remoteVideo" autoplay playsinline></video>
-      <video id="localVideo" autoplay playsinline muted></video>
+      <video id="localVideo"  autoplay playsinline muted></video>
     </div>
-    <canvas id="filterCanvas"></canvas>
 
     <div class="filter-bar">
-      <div class="filter-pill active" onclick="setFilter('none', this)">🎥 Normal</div>
-      <div class="filter-pill" onclick="setFilter('grayscale(100%)', this)">⬛ B&N</div>
-      <div class="filter-pill" onclick="setFilter('sepia(100%)', this)">🟫 Sepia</div>
-      <div class="filter-pill" onclick="setFilter('hue-rotate(90deg) saturate(2)', this)">🟢 Verde</div>
-      <div class="filter-pill" onclick="setFilter('hue-rotate(200deg) saturate(2)', this)">🔵 Azul</div>
-      <div class="filter-pill" onclick="setFilter('invert(100%)', this)">🔄 Invertir</div>
-      <div class="filter-pill" onclick="setFilter('contrast(2) brightness(0.8)', this)">🎞️ Cine</div>
-      <div class="filter-pill" onclick="setFilter('saturate(3)', this)">🌈 Vívido</div>
-      <div class="filter-pill" onclick="setFilter('blur(2px)', this)">🌫️ Blur</div>
+      <div class="filter-pill active" onclick="setFilter('none',this)">🎥 Normal</div>
+      <div class="filter-pill" onclick="setFilter('grayscale(100%)',this)">⬛ B&N</div>
+      <div class="filter-pill" onclick="setFilter('sepia(100%)',this)">🟫 Sepia</div>
+      <div class="filter-pill" onclick="setFilter('hue-rotate(90deg) saturate(2)',this)">🟢 Verde</div>
+      <div class="filter-pill" onclick="setFilter('hue-rotate(200deg) saturate(2)',this)">🔵 Azul</div>
+      <div class="filter-pill" onclick="setFilter('invert(100%)',this)">🔄 Invertir</div>
+      <div class="filter-pill" onclick="setFilter('contrast(2) brightness(0.8)',this)">🎞️ Cine</div>
+      <div class="filter-pill" onclick="setFilter('saturate(3)',this)">🌈 Vívido</div>
+      <div class="filter-pill" onclick="setFilter('blur(2px)',this)">🌫️ Blur</div>
     </div>
 
     <div class="call-status" id="callStatus">Conectando…</div>
 
     <div class="call-controls">
-      <button class="ctrl-btn mute" id="muteBtn" onclick="toggleMute()" title="Silenciar">🎙️</button>
-      <button class="ctrl-btn hangup" onclick="hangup()" title="Colgar">📵</button>
-      <button class="ctrl-btn cam" id="camBtn" onclick="toggleCam()" title="Cámara">📷</button>
+      <button class="ctrl-btn mute" id="muteBtn" onclick="toggleMute()">🎙️</button>
+      <button class="ctrl-btn hangup" onclick="hangup()">📵</button>
+      <button class="ctrl-btn cam"  id="camBtn"  onclick="toggleCam()">📷</button>
     </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
-// ══ STORAGE ══
+// ── STORAGE ──
 var USERS_KEY = 'nemu_users';
 var SESSION_KEY = 'nemu_session';
 
@@ -408,29 +317,50 @@ function getSession() {
 function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
 function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
-// ══ UI HELPERS ══
+// ── UI ──
 function show(id) {
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
 }
-function showErr(id, msg) {
+function showMsg(id, text, type) {
   var el = document.getElementById(id);
-  el.textContent = msg;
+  el.className = 'msg msg-' + (type || 'err');
+  el.textContent = text;
   el.style.display = 'block';
 }
-function hideErr(id) { document.getElementById(id).style.display = 'none'; }
-function showLogin() { show('authScreen'); hideErr('loginError'); }
-function showRegister() { show('registerScreen'); hideErr('registerError'); }
+function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
+function showLogin() { show('authScreen'); hideMsg('loginError'); }
+function showRegister() { show('registerScreen'); hideMsg('registerError'); }
 
-// ══ AUTH ══
+// ── CHECK PERMISSIONS ──
+function checkPermissions() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    document.getElementById('permBanner').style.display = 'block';
+    document.getElementById('permBanner').textContent = '❌ Tu navegador no soporta cámara/micrófono. Usa Chrome o Firefox.';
+    return;
+  }
+  navigator.permissions && navigator.permissions.query({name:'camera'}).then(function(r){
+    if (r.state === 'denied') {
+      document.getElementById('permBanner').style.display = 'block';
+      document.getElementById('permBanner').innerHTML = '❌ <strong>Cámara bloqueada.</strong> Ve a la configuración de tu navegador y permite el acceso a cámara y micrófono para este sitio.';
+    } else if (r.state === 'prompt') {
+      document.getElementById('permBanner').style.display = 'block';
+    }
+  }).catch(function(){
+    document.getElementById('permBanner').style.display = 'block';
+  });
+}
+
+// ── AUTH ──
 function register() {
   var name = document.getElementById('regName').value.trim();
   var num  = document.getElementById('regNum').value.trim();
   var pass = document.getElementById('regPass').value;
-  if (!name || !num || !pass) { showErr('registerError','Completa todos los campos'); return; }
-  if (!/^\d+$/.test(num))     { showErr('registerError','El número solo debe tener dígitos'); return; }
+  hideMsg('registerError');
+  if (!name || !num || !pass) { showMsg('registerError','Completa todos los campos'); return; }
+  if (!/^\d+$/.test(num))     { showMsg('registerError','El número solo debe tener dígitos'); return; }
   var users = getUsers();
-  if (users[num])             { showErr('registerError','Ese número ya está en uso'); return; }
+  if (users[num])             { showMsg('registerError','Ese número ya está en uso, elige otro'); return; }
   users[num] = { name: name, pass: pass };
   saveUsers(users);
   saveSession({ num: num, name: name });
@@ -440,9 +370,10 @@ function register() {
 function login() {
   var num  = document.getElementById('loginNum').value.trim();
   var pass = document.getElementById('loginPass').value;
+  hideMsg('loginError');
   var users = getUsers();
   if (!users[num] || users[num].pass !== pass) {
-    showErr('loginError','Número o contraseña incorrectos'); return;
+    showMsg('loginError','Número o contraseña incorrectos'); return;
   }
   saveSession({ num: num, name: users[num].name });
   enterHome(num, users[num].name);
@@ -454,81 +385,135 @@ function logout() {
   showLogin();
 }
 
-// ══ HOME ══
+// ── HOME ──
 function enterHome(num, name) {
   document.getElementById('displayName').textContent = name;
-  document.getElementById('displayNum').textContent  = '📞 ' + num;
+  document.getElementById('displayNum').textContent  = num;
   document.getElementById('myNumBig').textContent    = num;
   initPeer(num);
+  checkPermissions();
   show('homeScreen');
 }
 
-// ══ PEERJS ══
+// ── PEERJS ──
 var peer = null;
 var localStream = null;
 var currentCall = null;
+var pendingCall = null;
 var muted = false;
 var camOff = false;
-var pendingCall = null;
-var withVideo = false;
 
 function initPeer(num) {
   if (peer) { try { peer.destroy(); } catch(e){} }
+  var dot = document.getElementById('connDot');
+
   peer = new Peer('nemu-' + num, {
-    host: '0.peerjs.com', port: 443, path: '/', secure: true
+    host: '0.peerjs.com', port: 443, path: '/', secure: true,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    }
   });
+
+  peer.on('open', function(id) {
+    dot.classList.add('online');
+  });
+
+  peer.on('disconnected', function() {
+    dot.classList.remove('online');
+    setTimeout(function(){ if(peer) peer.reconnect(); }, 3000);
+  });
+
   peer.on('call', function(call) {
     pendingCall = call;
-    var callerNum = call.peer.replace('nemu-','');
-    document.getElementById('callerNum').textContent = callerNum;
+    document.getElementById('callerNum').textContent = call.peer.replace('nemu-','');
     show('incomingScreen');
   });
+
   peer.on('error', function(err) {
-    console.error('PeerJS:', err);
-    document.getElementById('callStatus').textContent = 'Error: ' + err.type;
+    console.error('PeerJS error:', err.type, err);
+    if (err.type === 'peer-unavailable') {
+      showMsg('callError', 'Ese número no está conectado o no existe.'); return;
+    }
+    showMsg('callError', 'Error de conexión: ' + err.type);
+    show('homeScreen');
+  });
+}
+
+function getMedia(video, callback) {
+  var constraints = { audio: true, video: video };
+  navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+    callback(null, stream);
+  }).catch(function(err) {
+    var msg = 'No se pudo acceder a la cámara/micrófono.';
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      msg = '❌ Permiso denegado. Toca el candado en la barra del navegador y permite cámara y micrófono.';
+    } else if (err.name === 'NotFoundError') {
+      msg = '❌ No se encontró cámara o micrófono en este dispositivo.';
+    } else if (err.name === 'NotReadableError') {
+      msg = '❌ La cámara está siendo usada por otra app. Ciérrala e intenta de nuevo.';
+    }
+    callback(msg, null);
   });
 }
 
 function startCall(video) {
-  withVideo = video;
+  hideMsg('callError');
   var dest = document.getElementById('dialInput').value.trim();
-  if (!dest) { alert('Escribe el número al que quieres llamar'); return; }
-  navigator.mediaDevices.getUserMedia({ video: video, audio: true }).then(function(stream) {
+  if (!dest) { showMsg('callError','Escribe el número al que quieres llamar'); return; }
+  if (!peer || !peer.open) { showMsg('callError','Aún conectando… espera un momento'); return; }
+
+  getMedia(video, function(err, stream) {
+    if (err) { showMsg('callError', err); return; }
     localStream = stream;
     document.getElementById('localVideo').srcObject = stream;
-    var call = peer.call('nemu-' + dest, stream);
-    currentCall = call;
     show('callScreen');
     document.getElementById('callStatus').textContent = 'Llamando a ' + dest + '…';
+
+    var call = peer.call('nemu-' + dest, stream);
+    currentCall = call;
+
+    var answered = false;
+    var timeout = setTimeout(function() {
+      if (!answered) {
+        hangup();
+        show('homeScreen');
+        showMsg('callError', 'No contestó o el número no está conectado.');
+      }
+    }, 30000);
+
     call.on('stream', function(remoteStream) {
+      answered = true;
+      clearTimeout(timeout);
       document.getElementById('remoteVideo').srcObject = remoteStream;
-      document.getElementById('callStatus').textContent = 'En llamada';
+      document.getElementById('callStatus').textContent = 'En llamada ✅';
     });
-    call.on('close', function() { endCallUI(); });
+    call.on('close', function() { clearTimeout(timeout); endCallUI(); });
     call.on('error', function(e) {
-      document.getElementById('callStatus').textContent = 'Error de conexión';
+      clearTimeout(timeout);
+      show('homeScreen');
+      showMsg('callError', 'Error durante la llamada.');
     });
-  }).catch(function(e) {
-    alert('No se pudo acceder a la cámara/micrófono: ' + e.message);
   });
 }
 
 function answerCall() {
   if (!pendingCall) return;
   var call = pendingCall; pendingCall = null;
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function(stream) {
+  getMedia(true, function(err, stream) {
+    if (err) { show('homeScreen'); showMsg('callError', err); return; }
     localStream = stream;
     document.getElementById('localVideo').srcObject = stream;
     call.answer(stream);
     currentCall = call;
     show('callScreen');
-    document.getElementById('callStatus').textContent = 'En llamada';
+    document.getElementById('callStatus').textContent = 'En llamada ✅';
     call.on('stream', function(remoteStream) {
       document.getElementById('remoteVideo').srcObject = remoteStream;
     });
     call.on('close', function() { endCallUI(); });
-  }).catch(function(e) {
-    alert('No se pudo acceder a la cámara/micrófono: ' + e.message);
   });
 }
 
@@ -539,18 +524,27 @@ function rejectCall() {
 
 function hangup() {
   if (currentCall) { try { currentCall.close(); } catch(e){} currentCall = null; }
-  if (localStream) { localStream.getTracks().forEach(function(t){ t.stop(); }); localStream = null; }
+  stopStream();
   endCallUI();
+}
+
+function stopStream() {
+  if (localStream) { localStream.getTracks().forEach(function(t){ t.stop(); }); localStream = null; }
 }
 
 function endCallUI() {
   document.getElementById('remoteVideo').srcObject = null;
   document.getElementById('localVideo').srcObject  = null;
-  setFilter('none', document.querySelector('.filter-pill.active'));
+  document.querySelectorAll('.filter-pill').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelector('.filter-pill').classList.add('active');
+  document.getElementById('localVideo').style.filter = 'none';
+  muted = false; camOff = false;
+  document.getElementById('muteBtn').textContent = '🎙️';
+  document.getElementById('camBtn').textContent  = '📷';
   show('homeScreen');
 }
 
-// ══ CONTROLS ══
+// ── CONTROLS ──
 function toggleMute() {
   if (!localStream) return;
   muted = !muted;
@@ -565,14 +559,14 @@ function toggleCam() {
   document.getElementById('camBtn').textContent = camOff ? '🚫' : '📷';
 }
 
-// ══ FILTERS ══
+// ── FILTERS ──
 function setFilter(filter, el) {
   document.getElementById('localVideo').style.filter = filter;
   document.querySelectorAll('.filter-pill').forEach(function(p){ p.classList.remove('active'); });
   if (el) el.classList.add('active');
 }
 
-// ══ INIT ══
+// ── INIT ──
 (function() {
   var session = getSession();
   if (session && session.num) {
