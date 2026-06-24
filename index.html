@@ -412,7 +412,24 @@ function initPeer(num) {
     config: {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        {
+          urls: 'turn:openrelay.metered.ca:80',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        },
+        {
+          urls: 'turn:openrelay.metered.ca:443',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        },
+        {
+          urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        }
       ]
     }
   });
@@ -487,7 +504,11 @@ function startCall(video) {
     call.on('stream', function(remoteStream) {
       answered = true;
       clearTimeout(timeout);
-      document.getElementById('remoteVideo').srcObject = remoteStream;
+      var rv = document.getElementById('remoteVideo');
+      rv.srcObject = remoteStream;
+      rv.muted = false;
+      rv.volume = 1.0;
+      rv.play().catch(function(){});
       document.getElementById('callStatus').textContent = 'En llamada ✅';
     });
     call.on('close', function() { clearTimeout(timeout); endCallUI(); });
@@ -511,7 +532,12 @@ function answerCall() {
     show('callScreen');
     document.getElementById('callStatus').textContent = 'En llamada ✅';
     call.on('stream', function(remoteStream) {
-      document.getElementById('remoteVideo').srcObject = remoteStream;
+      var rv = document.getElementById('remoteVideo');
+      rv.srcObject = remoteStream;
+      rv.muted = false;
+      rv.volume = 1.0;
+      rv.play().catch(function(){});
+      document.getElementById('callStatus').textContent = 'En llamada ✅';
     });
     call.on('close', function() { endCallUI(); });
   });
