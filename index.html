@@ -11,7 +11,208 @@
   <meta name="apple-mobile-web-app-title" content="Ñemu">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#000000">
-  <link rel="stylesheet" href="app.css">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    :root{
+      --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;
+      --accent:#30d158;--accent2:#0a84ff;--red:#ff453a;
+      --yellow:#ffd60a;--purple:#bf5af2;
+      --text:#fff;--muted:rgba(255,255,255,0.55);--border:rgba(255,255,255,0.12);
+    }
+    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+      font-family:-apple-system,'SF Pro Display','Segoe UI',system-ui,sans-serif;}
+
+    /* ── SCREENS ── */
+    .screen{display:none;position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;}
+    .screen.active{display:flex;flex-direction:column;}
+
+    /* ── AUTH ── */
+    #authScreen{background:linear-gradient(180deg,#1a1a2e 0%,#000 100%);
+      align-items:center;justify-content:center;padding:40px 24px;}
+    .auth-wrap{width:100%;max-width:360px;display:flex;flex-direction:column;gap:24px;}
+    .auth-logo{text-align:center;}
+    .auth-logo .icon{font-size:64px;display:block;margin-bottom:8px;}
+    .auth-logo h1{font-size:2rem;font-weight:800;letter-spacing:-1px;}
+    .auth-logo p{color:var(--muted);font-size:0.9rem;margin-top:4px;}
+    .auth-card{background:rgba(255,255,255,0.06);border:1px solid var(--border);
+      border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px;}
+    .auth-card h2{font-size:1.1rem;font-weight:700;}
+    .field{display:flex;flex-direction:column;gap:6px;}
+    .field label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+    .field input{background:rgba(255,255,255,0.08);border:1px solid var(--border);
+      border-radius:12px;color:var(--text);font-size:1rem;padding:13px 14px;outline:none;
+      transition:border-color .2s;}
+    .field input:focus{border-color:var(--accent2);}
+    .field input::placeholder{color:rgba(255,255,255,0.25);}
+    .btn{border:none;border-radius:14px;cursor:pointer;font-size:1rem;font-weight:600;
+      padding:14px;width:100%;transition:opacity .15s,transform .08s;}
+    .btn:active{transform:scale(0.97);opacity:.85;}
+    .btn-green{background:var(--accent);color:#000;}
+    .btn-blue{background:var(--accent2);color:#fff;}
+    .btn-red{background:var(--red);color:#fff;}
+    .btn-gray{background:rgba(255,255,255,0.1);color:var(--text);}
+    .toggle{text-align:center;font-size:.85rem;color:var(--muted);}
+    .toggle span{color:var(--accent2);cursor:pointer;}
+    .errmsg{background:rgba(255,69,58,.15);border:1px solid rgba(255,69,58,.3);
+      border-radius:10px;color:#ff6961;font-size:.83rem;padding:10px 14px;display:none;}
+
+    /* ── MAIN APP ── */
+    #appScreen{background:var(--bg);flex-direction:column;}
+
+    /* STATUS BAR SPACER */
+    .sb{height:env(safe-area-inset-top,44px);background:var(--bg);}
+
+    /* TOP NAV */
+    .topnav{display:flex;align-items:center;justify-content:space-between;
+      padding:8px 20px 12px;background:var(--bg);}
+    .topnav .left{display:flex;flex-direction:column;}
+    .topnav .uname{font-size:1.1rem;font-weight:700;}
+    .topnav .unum{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:5px;}
+    .online-dot{width:7px;height:7px;border-radius:50%;background:#555;}
+    .online-dot.on{background:var(--accent);}
+    .topnav .right{display:flex;gap:10px;align-items:center;}
+    .icon-btn{background:rgba(255,255,255,0.1);border:none;border-radius:50%;
+      width:36px;height:36px;cursor:pointer;font-size:1rem;color:var(--text);
+      display:flex;align-items:center;justify-content:center;}
+
+    /* TABS */
+    .tabs{display:flex;border-bottom:1px solid var(--border);}
+    .tab{flex:1;padding:12px;text-align:center;font-size:.85rem;color:var(--muted);
+      cursor:pointer;border-bottom:2px solid transparent;transition:color .2s;}
+    .tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+
+    /* DIAL PAD TAB */
+    .dialpad-wrap{flex:1;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;padding:20px 24px 40px;gap:24px;}
+    .dial-display{width:100%;text-align:center;}
+    .dial-number{font-size:2.8rem;font-weight:200;letter-spacing:6px;min-height:60px;
+      color:var(--text);word-break:break-all;}
+    .dial-hint{font-size:.8rem;color:var(--muted);margin-top:4px;}
+    .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:300px;}
+    .key{background:var(--card2);border:none;border-radius:50%;
+      width:72px;height:72px;margin:0 auto;cursor:pointer;color:var(--text);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      transition:background .1s,transform .08s;}
+    .key:active{background:#444;transform:scale(.93);}
+    .key .d{font-size:1.5rem;font-weight:300;line-height:1;}
+    .key .s{font-size:.5rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+    .key.action-green{background:var(--accent);}
+    .key.action-green .d{color:#000;font-size:1.6rem;}
+    .key.action-red{background:var(--red);}
+    .key.action-red .d{font-size:1.3rem;}
+    .key.empty{background:transparent;pointer-events:none;}
+    .dial-errmsg{color:#ff6961;font-size:.83rem;text-align:center;min-height:18px;}
+
+    /* RECENTS TAB */
+    .recents-wrap{flex:1;padding:0 16px 80px;overflow-y:auto;}
+    .recents-empty{text-align:center;color:var(--muted);padding:60px 0;font-size:.9rem;}
+    .recent-item{display:flex;align-items:center;gap:14px;padding:14px 4px;
+      border-bottom:1px solid var(--border);cursor:pointer;}
+    .recent-item:active{background:rgba(255,255,255,.04);border-radius:12px;}
+    .recent-avatar{width:44px;height:44px;border-radius:50%;background:var(--card2);
+      display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+    .recent-info{flex:1;}
+    .recent-name{font-size:1rem;font-weight:500;}
+    .recent-time{font-size:.78rem;color:var(--muted);margin-top:2px;}
+    .recent-call-btn{color:var(--accent2);font-size:1.2rem;padding:8px;}
+
+    /* CONTACTS TAB */
+    .contacts-wrap{flex:1;padding:0 16px 80px;overflow-y:auto;}
+    .my-card{background:var(--card);border-radius:18px;padding:18px;margin:12px 0;
+      display:flex;align-items:center;gap:14px;}
+    .my-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--purple));
+      display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+    .my-info .my-name{font-size:1.1rem;font-weight:700;}
+    .my-info .my-num{font-size:.85rem;color:var(--accent2);font-weight:600;letter-spacing:2px;margin-top:2px;}
+    .share-hint{font-size:.75rem;color:var(--muted);margin-top:6px;}
+
+    /* INSTALL BANNER */
+    .install-banner{background:linear-gradient(135deg,#1c3a5e,#0a2040);
+      border:1px solid rgba(10,132,255,.3);border-radius:16px;margin:8px 16px;
+      padding:14px 16px;display:none;align-items:center;gap:12px;}
+    .install-banner .ib-text{flex:1;}
+    .install-banner .ib-title{font-size:.9rem;font-weight:700;}
+    .install-banner .ib-sub{font-size:.75rem;color:var(--muted);margin-top:2px;}
+    .install-banner .ib-btn{background:var(--accent2);border:none;border-radius:10px;
+      color:#fff;cursor:pointer;font-size:.82rem;font-weight:600;padding:8px 14px;white-space:nowrap;}
+
+    /* NOTIF BANNER */
+    .notif-banner{background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.3);
+      border-radius:16px;margin:8px 16px;padding:14px 16px;display:none;
+      align-items:center;gap:12px;}
+    .notif-banner .nb-text{flex:1;font-size:.83rem;color:var(--yellow);}
+    .notif-banner .nb-btn{background:rgba(255,214,10,.2);border:none;border-radius:10px;
+      color:var(--yellow);cursor:pointer;font-size:.82rem;font-weight:600;padding:8px 14px;}
+
+    /* BOTTOM NAV */
+    .bottomnav{position:fixed;bottom:0;left:0;right:0;
+      background:rgba(0,0,0,.85);backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);
+      padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));
+      display:flex;}
+    .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+      cursor:pointer;color:var(--muted);transition:color .2s;}
+    .bnav-item.active{color:var(--accent2);}
+    .bnav-item .bi{font-size:1.4rem;}
+    .bnav-item .bl{font-size:.65rem;font-weight:500;}
+
+    /* ── INCOMING SCREEN ── */
+    #incomingScreen{background:linear-gradient(180deg,#1a2a1a 0%,#000 100%);
+      align-items:center;justify-content:center;padding:40px 24px;}
+    .incoming-wrap{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:32px;}
+    .incoming-avatar{width:120px;height:120px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),#006c2e);
+      display:flex;align-items:center;justify-content:center;font-size:3rem;
+      box-shadow:0 0 60px rgba(48,209,88,.3);}
+    .incoming-name{font-size:2rem;font-weight:700;text-align:center;}
+    .incoming-label{color:var(--muted);font-size:1rem;}
+    .incoming-btns{display:flex;gap:40px;justify-content:center;margin-top:16px;}
+    .call-circle{width:72px;height:72px;border-radius:50%;border:none;cursor:pointer;
+      font-size:1.8rem;display:flex;align-items:center;justify-content:center;
+      transition:transform .1s;}
+    .call-circle:active{transform:scale(.92);}
+    .call-circle.ans{background:var(--accent);}
+    .call-circle.rej{background:var(--red);}
+    .call-circle-label{font-size:.75rem;color:var(--muted);text-align:center;margin-top:6px;}
+    .incoming-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
+
+    /* ── CALL SCREEN ── */
+    #callScreen{background:#000;}
+    .call-wrap{display:flex;flex-direction:column;height:100%;}
+    .videos-container{position:relative;flex:1;background:#111;}
+    #remoteVideo{width:100%;height:100%;object-fit:cover;display:block;}
+    #localVideo{position:absolute;top:16px;right:16px;width:100px;height:140px;
+      border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.3);
+      box-shadow:0 4px 20px rgba(0,0,0,.5);}
+    .call-overlay-top{position:absolute;top:0;left:0;right:0;
+      padding:calc(env(safe-area-inset-top,20px) + 12px) 20px 12px;
+      background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,transparent 100%);}
+    .call-peer{font-size:1.3rem;font-weight:700;}
+    .call-status{font-size:.85rem;color:rgba(255,255,255,.7);margin-top:2px;}
+
+    .call-bottom{background:rgba(0,0,0,.85);backdrop-filter:blur(20px);
+      padding:12px 20px calc(24px + env(safe-area-inset-bottom,0px));}
+    .filter-row{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none;}
+    .filter-row::-webkit-scrollbar{display:none;}
+    .fpill{background:rgba(255,255,255,.1);border:none;border-radius:50px;color:var(--text);
+      cursor:pointer;flex-shrink:0;font-size:.78rem;padding:6px 14px;white-space:nowrap;
+      transition:background .15s;}
+    .fpill.on{background:var(--accent2);}
+    .ctrl-row{display:flex;justify-content:space-around;align-items:center;padding:8px 0;}
+    .ctrl{width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+      transition:transform .08s,background .15s;}
+    .ctrl:active{transform:scale(.92);}
+    .ctrl.off{background:rgba(255,255,255,.15);}
+    .ctrl.on{background:rgba(255,255,255,.35);}
+    .ctrl.hangup{background:var(--red);width:68px;height:68px;font-size:1.5rem;}
+
+    /* no-video overlay */
+    .no-video-overlay{position:absolute;inset:0;background:#1c1c1e;
+      display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;}
+    .no-video-overlay .nv-av{font-size:5rem;}
+    .no-video-overlay .nv-name{font-size:1.3rem;font-weight:700;}
+  </style>
 </head>
 <body>
 
@@ -210,6 +411,355 @@
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script src="app.js"></script>
+<script>
+// ══ STORAGE ══
+var UK = 'nemu_users', SK = 'nemu_session', RK = 'nemu_recents';
+var getU = function(){ try{return JSON.parse(localStorage.getItem(UK)||'{}')}catch(e){return{}} };
+var setU = function(u){ localStorage.setItem(UK,JSON.stringify(u)) };
+var getSess = function(){ try{return JSON.parse(localStorage.getItem(SK))}catch(e){return null} };
+var setSess = function(s){ localStorage.setItem(SK,JSON.stringify(s)) };
+var clrSess = function(){ localStorage.removeItem(SK) };
+var getR = function(){ try{return JSON.parse(localStorage.getItem(RK)||'[]')}catch(e){return[]} };
+var setR = function(r){ localStorage.setItem(RK,JSON.stringify(r.slice(0,50))) };
+
+// ══ STATE ══
+var peer=null, localStream=null, currentCall=null, pendingCall=null;
+var muted=false, camOff=false, callNum='', deferredPrompt=null;
+var currentUser=null;
+
+// ══ UI ══
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+}
+function showLogin(){ show('authScreen'); hide('loginErr'); }
+function showReg(){ show('regScreen'); hide('regErr'); }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function err(id,msg){ var e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
+
+// ══ TABS ══
+var currentTab = 'dial';
+function switchTab(t){
+  currentTab = t;
+  ['dial','recents','me'].forEach(function(x){
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===t);
+    document.getElementById('tabContent'+x.charAt(0).toUpperCase()+x.slice(1)).style.display = x===t ? 'flex' : 'none';
+  });
+  if(t==='recents') renderRecents();
+}
+
+// ══ KEYPAD ══
+var dialStr='';
+function kp(d){ if(dialStr.length>=15)return; dialStr+=d; document.getElementById('dialNum').textContent=dialStr||'\u200B'; }
+function kpDel(){ dialStr=dialStr.slice(0,-1); document.getElementById('dialNum').textContent=dialStr||'\u200B'; }
+function callDial(video){ startCall(dialStr, video); }
+
+// ══ AUTH ══
+function doRegister(){
+  var name=document.getElementById('regName').value.trim();
+  var num=document.getElementById('regNum').value.trim();
+  var pass=document.getElementById('regPass').value;
+  hide('regErr');
+  if(!name||!num||!pass){err('regErr','Completa todos los campos');return;}
+  if(!/^\d+$/.test(num)){err('regErr','El número solo debe tener dígitos');return;}
+  var u=getU();
+  if(u[num]){err('regErr','Ese número ya existe, elige otro');return;}
+  u[num]={name:name,pass:pass};
+  setU(u);
+  setSess({num:num,name:name});
+  enterApp(num,name);
+}
+
+function login(){
+  var num=document.getElementById('loginNum').value.trim();
+  var pass=document.getElementById('loginPass').value;
+  hide('loginErr');
+  var u=getU();
+  if(!u[num]||u[num].pass!==pass){err('loginErr','Número o contraseña incorrectos');return;}
+  setSess({num:num,name:u[num].name});
+  enterApp(num,u[num].name);
+}
+
+function logout(){
+  if(peer){try{peer.destroy()}catch(e){} peer=null;}
+  clrSess(); showLogin();
+}
+
+// ══ ENTER APP ══
+function enterApp(num,name){
+  currentUser={num:num,name:name};
+  document.getElementById('uName').textContent=name;
+  document.getElementById('uNum').textContent=num;
+  document.getElementById('myName').textContent=name;
+  document.getElementById('myNum').textContent=num;
+  show('appScreen');
+  switchTab('dial');
+  initPeer(num);
+  checkBanners();
+}
+
+function copyNum(){
+  var n=currentUser?currentUser.num:'';
+  if(navigator.clipboard){navigator.clipboard.writeText(n);}
+  var b=document.getElementById('myNum');
+  b.textContent='✅ Copiado!';
+  setTimeout(function(){b.textContent=currentUser.num;},1500);
+}
+
+// ══ PEERJS ══
+function initPeer(num){
+  if(peer){try{peer.destroy()}catch(e){}}
+  var dot=document.getElementById('onlineDot');
+  peer=new Peer('nemu-'+num,{
+    host:'0.peerjs.com',port:443,path:'/',secure:true,
+    config:{iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:stun2.l.google.com:19302'},
+      {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}
+    ]}
+  });
+  peer.on('open',function(){ dot.classList.add('on'); });
+  peer.on('disconnected',function(){ dot.classList.remove('on'); setTimeout(function(){if(peer)peer.reconnect();},3000); });
+  peer.on('call',function(call){
+    pendingCall=call;
+    callNum=call.peer.replace('nemu-','');
+    document.getElementById('incomingNum').textContent=callNum;
+    show('incomingScreen');
+    vibrateIncoming();
+    sendNotif('📲 Llamada de '+callNum,'Toca para contestar en Ñemu');
+  });
+  peer.on('error',function(e){
+    if(e.type==='peer-unavailable'){setDialErr('El número '+dialStr+' no está conectado.');return;}
+    setDialErr('Error: '+e.type);
+    show('appScreen');
+  });
+}
+
+function setDialErr(msg){
+  var el=document.getElementById('dialErr');
+  el.textContent=msg;
+  setTimeout(function(){el.textContent='';},4000);
+}
+
+// ══ MEDIA ══
+function getMedia(video,cb){
+  navigator.mediaDevices.getUserMedia({audio:true,video:video})
+    .then(function(s){cb(null,s)})
+    .catch(function(e){
+      var m='No se pudo acceder a la cámara/micrófono.';
+      if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError')
+        m='Permiso denegado. Toca el candado en el navegador y permite cámara y micrófono.';
+      else if(e.name==='NotFoundError') m='No se encontró cámara o micrófono.';
+      else if(e.name==='NotReadableError') m='La cámara está en uso por otra app.';
+      cb(m,null);
+    });
+}
+
+// ══ CALLS ══
+function startCall(dest, video){
+  if(!dest){setDialErr('Marca un número primero');return;}
+  if(!peer||!peer.open){setDialErr('Conectando… espera un momento');return;}
+  getMedia(video,function(e,stream){
+    if(e){setDialErr(e);return;}
+    localStream=stream;
+    document.getElementById('localVideo').srcObject=stream;
+    showCallScreen(dest, video);
+    document.getElementById('callStatus').textContent='Llamando…';
+    var call=peer.call('nemu-'+dest,stream);
+    currentCall=call;
+    var answered=false;
+    var t=setTimeout(function(){
+      if(!answered){hangup();setDialErr('No contestó o el número no está conectado.');}
+    },30000);
+    call.on('stream',function(rs){
+      answered=true; clearTimeout(t);
+      setRemoteStream(rs);
+      document.getElementById('callStatus').textContent='En llamada ✅';
+      addRecent(dest,'out');
+    });
+    call.on('close',function(){clearTimeout(t);endCallUI();});
+    call.on('error',function(){clearTimeout(t);endCallUI();setDialErr('Error de conexión.');});
+  });
+}
+
+function answerCall(){
+  if(!pendingCall)return;
+  var call=pendingCall; pendingCall=null;
+  getMedia(true,function(e,stream){
+    if(e){show('appScreen');setDialErr(e);return;}
+    localStream=stream;
+    document.getElementById('localVideo').srcObject=stream;
+    call.answer(stream);
+    currentCall=call;
+    showCallScreen(callNum, true);
+    document.getElementById('callStatus').textContent='En llamada ✅';
+    call.on('stream',function(rs){
+      setRemoteStream(rs);
+      addRecent(callNum,'in');
+    });
+    call.on('close',function(){endCallUI();});
+  });
+}
+
+function rejectCall(){
+  if(pendingCall){try{pendingCall.close()}catch(e){} pendingCall=null;}
+  show('appScreen');
+}
+
+function showCallScreen(num, video){
+  document.getElementById('callPeer').textContent=num;
+  document.getElementById('noVideoName').textContent=num;
+  document.getElementById('noVideoOverlay').style.display = video ? 'none' : 'flex';
+  show('callScreen');
+}
+
+function setRemoteStream(rs){
+  var rv=document.getElementById('remoteVideo');
+  rv.srcObject=rs;
+  rv.muted=false;
+  rv.volume=1.0;
+  rv.play().catch(function(){});
+  // show no-video overlay if no video tracks
+  var hasVideo=rs.getVideoTracks().length>0;
+  document.getElementById('noVideoOverlay').style.display=hasVideo?'none':'flex';
+}
+
+function hangup(){
+  if(currentCall){try{currentCall.close()}catch(e){} currentCall=null;}
+  stopStream();
+  endCallUI();
+}
+
+function stopStream(){
+  if(localStream){localStream.getTracks().forEach(function(t){t.stop()});localStream=null;}
+}
+
+function endCallUI(){
+  document.getElementById('remoteVideo').srcObject=null;
+  document.getElementById('localVideo').srcObject=null;
+  document.getElementById('localVideo').style.filter='none';
+  document.querySelectorAll('.fpill').forEach(function(p){p.classList.remove('on')});
+  document.querySelector('.fpill').classList.add('on');
+  muted=false; camOff=false;
+  document.getElementById('btnMute').textContent='🎙️';
+  document.getElementById('btnCam').textContent='📷';
+  show('appScreen');
+}
+
+// ── CONTROLS ──
+function toggleMute(){
+  if(!localStream)return;
+  muted=!muted;
+  localStream.getAudioTracks().forEach(function(t){t.enabled=!muted});
+  var b=document.getElementById('btnMute');
+  b.textContent=muted?'🔇':'🎙️';
+  b.className='ctrl '+(muted?'on':'off');
+}
+function toggleCam(){
+  if(!localStream)return;
+  camOff=!camOff;
+  localStream.getVideoTracks().forEach(function(t){t.enabled=!camOff});
+  var b=document.getElementById('btnCam');
+  b.textContent=camOff?'🚫':'📷';
+  b.className='ctrl '+(camOff?'on':'off');
+}
+
+// ── FILTERS ──
+function setF(f,el){
+  document.getElementById('localVideo').style.filter=f;
+  document.querySelectorAll('.fpill').forEach(function(p){p.classList.remove('on')});
+  if(el)el.classList.add('on');
+}
+
+// ── RECENTS ──
+function addRecent(num, dir){
+  var r=getR();
+  r.unshift({num:num,dir:dir,time:Date.now()});
+  setR(r);
+}
+function renderRecents(){
+  var r=getR();
+  var wrap=document.getElementById('recentsList');
+  if(!r.length){wrap.innerHTML='<div class="recents-empty">Sin llamadas recientes</div>';return;}
+  wrap.innerHTML='';
+  r.forEach(function(item){
+    var d=new Date(item.time);
+    var t=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+    var icon=item.dir==='in'?'📲':'📞';
+    var div=document.createElement('div');
+    div.className='recent-item';
+    div.innerHTML='<div class="recent-avatar">'+icon+'</div>'+
+      '<div class="recent-info"><div class="recent-name">'+item.num+'</div>'+
+      '<div class="recent-time">'+(item.dir==='in'?'Entrante':'Saliente')+' · '+t+'</div></div>'+
+      '<div class="recent-call-btn" onclick="startCallRecent(\''+item.num+'\')">📞</div>';
+    wrap.appendChild(div);
+  });
+}
+function startCallRecent(num){
+  dialStr=num;
+  document.getElementById('dialNum').textContent=num;
+  switchTab('dial');
+  startCall(num,false);
+}
+
+// ── NOTIFICATIONS ──
+function sendNotif(title,body){
+  if('Notification' in window && Notification.permission==='granted'){
+    try{new Notification(title,{body:body,icon:'icon-192.png'});}catch(e){}
+  }
+}
+function askNotif(){
+  if(!('Notification' in window)){hide('notifBanner');return;}
+  Notification.requestPermission().then(function(p){
+    if(p==='granted') hide('notifBanner');
+  });
+}
+
+// ── VIBRATE ──
+function vibrateIncoming(){
+  if(navigator.vibrate){
+    var i=setInterval(function(){
+      if(document.getElementById('incomingScreen').classList.contains('active')){
+        navigator.vibrate([500,300,500]);
+      } else { clearInterval(i); }
+    },1400);
+  }
+}
+
+// ── INSTALL PWA ──
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('installBanner').style.display='flex';
+});
+window.addEventListener('appinstalled',function(){
+  document.getElementById('installBanner').style.display='none';
+});
+function doInstall(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;});}
+}
+
+// ── BANNERS ──
+function checkBanners(){
+  if('Notification' in window && Notification.permission==='default'){
+    document.getElementById('notifBanner').style.display='flex';
+  }
+}
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/telefono-nemu/sw.js').catch(function(){});
+  });
+}
+
+// ── INIT ──
+(function(){
+  var s=getSess();
+  if(s&&s.num){ enterApp(s.num,s.name); }
+})();
+</script>
 </body>
 </html>
