@@ -2,642 +2,763 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teléfono de Ñemu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ñemu</title>
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ñemu">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="theme-color" content="#7c3aed">
+  <meta name="theme-color" content="#000000">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0f0f1a;
-      --card: #1a1a2e;
-      --accent: #7c3aed;
-      --accent2: #a78bfa;
-      --green: #22c55e;
-      --red: #ef4444;
-      --text: #f1f5f9;
-      --muted: rgba(241,245,249,0.45);
-      --border: rgba(255,255,255,0.08);
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    :root{
+      --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;
+      --accent:#30d158;--accent2:#0a84ff;--red:#ff453a;
+      --yellow:#ffd60a;--purple:#bf5af2;
+      --text:#fff;--muted:rgba(255,255,255,0.55);--border:rgba(255,255,255,0.12);
     }
+    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+      font-family:-apple-system,'SF Pro Display','Segoe UI',system-ui,sans-serif;}
 
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
+    /* ── SCREENS ── */
+    .screen{display:none;position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;}
+    .screen.active{display:flex;flex-direction:column;}
 
-    .screen { display: none; width: 100%; max-width: 420px; }
-    .screen.active { display: flex; flex-direction: column; gap: 20px; }
+    /* ── AUTH ── */
+    #authScreen{background:linear-gradient(180deg,#1a1a2e 0%,#000 100%);
+      align-items:center;justify-content:center;padding:40px 24px;}
+    .auth-wrap{width:100%;max-width:360px;display:flex;flex-direction:column;gap:24px;}
+    .auth-logo{text-align:center;}
+    .auth-logo .icon{font-size:64px;display:block;margin-bottom:8px;}
+    .auth-logo h1{font-size:2rem;font-weight:800;letter-spacing:-1px;}
+    .auth-logo p{color:var(--muted);font-size:0.9rem;margin-top:4px;}
+    .auth-card{background:rgba(255,255,255,0.06);border:1px solid var(--border);
+      border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px;}
+    .auth-card h2{font-size:1.1rem;font-weight:700;}
+    .field{display:flex;flex-direction:column;gap:6px;}
+    .field label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+    .field input{background:rgba(255,255,255,0.08);border:1px solid var(--border);
+      border-radius:12px;color:var(--text);font-size:1rem;padding:13px 14px;outline:none;
+      transition:border-color .2s;}
+    .field input:focus{border-color:var(--accent2);}
+    .field input::placeholder{color:rgba(255,255,255,0.25);}
+    .btn{border:none;border-radius:14px;cursor:pointer;font-size:1rem;font-weight:600;
+      padding:14px;width:100%;transition:opacity .15s,transform .08s;}
+    .btn:active{transform:scale(0.97);opacity:.85;}
+    .btn-green{background:var(--accent);color:#000;}
+    .btn-blue{background:var(--accent2);color:#fff;}
+    .btn-red{background:var(--red);color:#fff;}
+    .btn-gray{background:rgba(255,255,255,0.1);color:var(--text);}
+    .toggle{text-align:center;font-size:.85rem;color:var(--muted);}
+    .toggle span{color:var(--accent2);cursor:pointer;}
+    .errmsg{background:rgba(255,69,58,.15);border:1px solid rgba(255,69,58,.3);
+      border-radius:10px;color:#ff6961;font-size:.83rem;padding:10px 14px;display:none;}
 
-    .logo-wrap { text-align: center; }
-    .logo-wrap .emoji { font-size: 3.5rem; }
-    .logo-wrap h1 { font-size: 1.6rem; font-weight: 800; margin-top: 8px; }
-    .logo-wrap p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+    /* ── MAIN APP ── */
+    #appScreen{background:var(--bg);flex-direction:column;}
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 28px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .card h2 { font-size: 1.1rem; font-weight: 700; }
+    /* STATUS BAR SPACER */
+    .sb{height:env(safe-area-inset-top,44px);background:var(--bg);}
 
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; }
-    .field input {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      font-size: 1rem;
-      padding: 12px 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .field input:focus { border-color: var(--accent2); }
-    .field input::placeholder { color: rgba(255,255,255,0.2); }
+    /* TOP NAV */
+    .topnav{display:flex;align-items:center;justify-content:space-between;
+      padding:8px 20px 12px;background:var(--bg);}
+    .topnav .left{display:flex;flex-direction:column;}
+    .topnav .uname{font-size:1.1rem;font-weight:700;}
+    .topnav .unum{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:5px;}
+    .online-dot{width:7px;height:7px;border-radius:50%;background:#555;}
+    .online-dot.on{background:var(--accent);}
+    .topnav .right{display:flex;gap:10px;align-items:center;}
+    .icon-btn{background:rgba(255,255,255,0.1);border:none;border-radius:50%;
+      width:36px;height:36px;cursor:pointer;font-size:1rem;color:var(--text);
+      display:flex;align-items:center;justify-content:center;}
 
-    .btn {
-      border: none; border-radius: 50px; cursor: pointer;
-      font-size: 1rem; font-weight: 700; padding: 14px;
-      transition: opacity 0.15s, transform 0.08s; width: 100%;
-    }
-    .btn:active { transform: scale(0.97); opacity: 0.85; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-green { background: var(--green); color: #fff; }
-    .btn-red { background: var(--red); color: #fff; }
-    .btn-gray { background: rgba(255,255,255,0.07); color: var(--text); }
+    /* TABS */
+    .tabs{display:flex;border-bottom:1px solid var(--border);}
+    .tab{flex:1;padding:12px;text-align:center;font-size:.85rem;color:var(--muted);
+      cursor:pointer;border-bottom:2px solid transparent;transition:color .2s;}
+    .tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
 
-    .toggle-link { text-align: center; font-size: 0.85rem; color: var(--muted); }
-    .toggle-link span { color: var(--accent2); cursor: pointer; text-decoration: underline; }
+    /* DIAL PAD TAB */
+    .dialpad-wrap{flex:1;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;padding:20px 24px 40px;gap:24px;}
+    .dial-display{width:100%;text-align:center;}
+    .dial-number{font-size:2.8rem;font-weight:200;letter-spacing:6px;min-height:60px;
+      color:var(--text);word-break:break-all;}
+    .dial-hint{font-size:.8rem;color:var(--muted);margin-top:4px;}
+    .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:300px;}
+    .key{background:var(--card2);border:none;border-radius:50%;
+      width:72px;height:72px;margin:0 auto;cursor:pointer;color:var(--text);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      transition:background .1s,transform .08s;}
+    .key:active{background:#444;transform:scale(.93);}
+    .key .d{font-size:1.5rem;font-weight:300;line-height:1;}
+    .key .s{font-size:.5rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+    .key.action-green{background:var(--accent);}
+    .key.action-green .d{color:#000;font-size:1.6rem;}
+    .key.action-red{background:var(--red);}
+    .key.action-red .d{font-size:1.3rem;}
+    .key.empty{background:transparent;pointer-events:none;}
+    .dial-errmsg{color:#ff6961;font-size:.83rem;text-align:center;min-height:18px;}
 
-    .msg {
-      border-radius: 10px; font-size: 0.85rem; padding: 10px 14px; display: none;
-    }
-    .msg-err { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
-    .msg-ok  { background: rgba(34,197,94,0.15);  border: 1px solid rgba(34,197,94,0.3);  color: #86efac; }
-    .msg-warn{ background: rgba(234,179,8,0.15);  border: 1px solid rgba(234,179,8,0.3);  color: #fde047; }
+    /* RECENTS TAB */
+    .recents-wrap{flex:1;padding:0 16px 80px;overflow-y:auto;}
+    .recents-empty{text-align:center;color:var(--muted);padding:60px 0;font-size:.9rem;}
+    .recent-item{display:flex;align-items:center;gap:14px;padding:14px 4px;
+      border-bottom:1px solid var(--border);cursor:pointer;}
+    .recent-item:active{background:rgba(255,255,255,.04);border-radius:12px;}
+    .recent-avatar{width:44px;height:44px;border-radius:50%;background:var(--card2);
+      display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+    .recent-info{flex:1;}
+    .recent-name{font-size:1rem;font-weight:500;}
+    .recent-time{font-size:.78rem;color:var(--muted);margin-top:2px;}
+    .recent-call-btn{color:var(--accent2);font-size:1.2rem;padding:8px;}
 
-    /* TOP BAR */
-    .top-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 18px; padding: 14px 18px;
-    }
-    .top-bar .user-info { display: flex; flex-direction: column; }
-    .top-bar .user-name { font-weight: 700; font-size: 1rem; }
-    .top-bar .user-num { color: var(--accent2); font-size: 0.85rem; font-weight: 600; }
-    .top-bar .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; display: inline-block; margin-right: 4px; }
-    .top-bar .conn-dot.online { background: var(--green); }
-    .logout-btn {
-      background: rgba(255,255,255,0.07); border: none; border-radius: 10px;
-      color: var(--muted); cursor: pointer; font-size: 0.8rem; padding: 6px 12px;
-    }
+    /* CONTACTS TAB */
+    .contacts-wrap{flex:1;padding:0 16px 80px;overflow-y:auto;}
+    .my-card{background:var(--card);border-radius:18px;padding:18px;margin:12px 0;
+      display:flex;align-items:center;gap:14px;}
+    .my-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--purple));
+      display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+    .my-info .my-name{font-size:1.1rem;font-weight:700;}
+    .my-info .my-num{font-size:.85rem;color:var(--accent2);font-weight:600;letter-spacing:2px;margin-top:2px;}
+    .share-hint{font-size:.75rem;color:var(--muted);margin-top:6px;}
 
-    /* DIAL */
-    .call-btn-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .number-input-wrap input {
-      width: 100%;
-      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-      border-radius: 12px; color: var(--text); font-size: 1.3rem;
-      letter-spacing: 3px; padding: 14px 16px; outline: none;
-      transition: border-color 0.2s;
-    }
-    .number-input-wrap input:focus { border-color: var(--accent2); }
-    .number-input-wrap input::placeholder { font-size: 0.9rem; letter-spacing: 0; color: rgba(255,255,255,0.2); }
+    /* INSTALL BANNER */
+    .install-banner{background:linear-gradient(135deg,#1c3a5e,#0a2040);
+      border:1px solid rgba(10,132,255,.3);border-radius:16px;margin:8px 16px;
+      padding:14px 16px;display:none;align-items:center;gap:12px;}
+    .install-banner .ib-text{flex:1;}
+    .install-banner .ib-title{font-size:.9rem;font-weight:700;}
+    .install-banner .ib-sub{font-size:.75rem;color:var(--muted);margin-top:2px;}
+    .install-banner .ib-btn{background:var(--accent2);border:none;border-radius:10px;
+      color:#fff;cursor:pointer;font-size:.82rem;font-weight:600;padding:8px 14px;white-space:nowrap;}
 
-    /* PERMISSION BANNER */
-    .perm-banner {
-      background: rgba(234,179,8,0.12); border: 1px solid rgba(234,179,8,0.3);
-      border-radius: 14px; padding: 14px 16px;
-      font-size: 0.85rem; color: #fde047; line-height: 1.5;
-      display: none;
-    }
+    /* NOTIF BANNER */
+    .notif-banner{background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.3);
+      border-radius:16px;margin:8px 16px;padding:14px 16px;display:none;
+      align-items:center;gap:12px;}
+    .notif-banner .nb-text{flex:1;font-size:.83rem;color:var(--yellow);}
+    .notif-banner .nb-btn{background:rgba(255,214,10,.2);border:none;border-radius:10px;
+      color:var(--yellow);cursor:pointer;font-size:.82rem;font-weight:600;padding:8px 14px;}
 
-    /* CALL SCREEN */
-    .videos-wrap {
-      position: relative; width: 100%; border-radius: 24px;
-      overflow: hidden; background: #000; aspect-ratio: 9/16; max-height: 60vh;
-    }
-    #remoteVideo { width: 100%; height: 100%; object-fit: cover; display: block; }
-    #localVideo {
-      position: absolute; bottom: 12px; right: 12px;
-      width: 90px; height: 120px; border-radius: 14px;
-      object-fit: cover; border: 2px solid rgba(255,255,255,0.3);
-    }
+    /* BOTTOM NAV */
+    .bottomnav{position:fixed;bottom:0;left:0;right:0;
+      background:rgba(0,0,0,.85);backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);
+      padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));
+      display:flex;}
+    .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+      cursor:pointer;color:var(--muted);transition:color .2s;}
+    .bnav-item.active{color:var(--accent2);}
+    .bnav-item .bi{font-size:1.4rem;}
+    .bnav-item .bl{font-size:.65rem;font-weight:500;}
 
-    .filter-bar {
-      display: flex; gap: 8px; padding: 12px 0;
-      overflow-x: auto; width: 100%; scrollbar-width: none;
-    }
-    .filter-bar::-webkit-scrollbar { display: none; }
-    .filter-pill {
-      background: rgba(255,255,255,0.07); border: 1px solid var(--border);
-      border-radius: 50px; color: var(--text); cursor: pointer;
-      flex-shrink: 0; font-size: 0.82rem; padding: 7px 14px;
-      transition: background 0.15s; white-space: nowrap;
-    }
-    .filter-pill.active { background: var(--accent); border-color: var(--accent); }
+    /* ── INCOMING SCREEN ── */
+    #incomingScreen{background:linear-gradient(180deg,#1a2a1a 0%,#000 100%);
+      align-items:center;justify-content:center;padding:40px 24px;}
+    .incoming-wrap{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:32px;}
+    .incoming-avatar{width:120px;height:120px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),#006c2e);
+      display:flex;align-items:center;justify-content:center;font-size:3rem;
+      box-shadow:0 0 60px rgba(48,209,88,.3);}
+    .incoming-name{font-size:2rem;font-weight:700;text-align:center;}
+    .incoming-label{color:var(--muted);font-size:1rem;}
+    .incoming-btns{display:flex;gap:40px;justify-content:center;margin-top:16px;}
+    .call-circle{width:72px;height:72px;border-radius:50%;border:none;cursor:pointer;
+      font-size:1.8rem;display:flex;align-items:center;justify-content:center;
+      transition:transform .1s;}
+    .call-circle:active{transform:scale(.92);}
+    .call-circle.ans{background:var(--accent);}
+    .call-circle.rej{background:var(--red);}
+    .call-circle-label{font-size:.75rem;color:var(--muted);text-align:center;margin-top:6px;}
+    .incoming-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
 
-    .call-controls {
-      display: flex; gap: 14px; justify-content: center;
-      padding: 8px 0; flex-wrap: wrap;
-    }
-    .ctrl-btn {
-      border: none; border-radius: 50%; cursor: pointer;
-      width: 56px; height: 56px; font-size: 1.3rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.08s;
-    }
-    .ctrl-btn:active { transform: scale(0.92); }
-    .ctrl-btn.mute { background: rgba(255,255,255,0.1); }
-    .ctrl-btn.cam  { background: rgba(255,255,255,0.1); }
-    .ctrl-btn.hangup { background: var(--red); width: 68px; height: 68px; font-size: 1.6rem; }
+    /* ── CALL SCREEN ── */
+    #callScreen{background:#000;}
+    .call-wrap{display:flex;flex-direction:column;height:100%;}
+    .videos-container{position:relative;flex:1;background:#111;}
+    #remoteVideo{width:100%;height:100%;object-fit:cover;display:block;}
+    #localVideo{position:absolute;top:16px;right:16px;width:100px;height:140px;
+      border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.3);
+      box-shadow:0 4px 20px rgba(0,0,0,.5);}
+    .call-overlay-top{position:absolute;top:0;left:0;right:0;
+      padding:calc(env(safe-area-inset-top,20px) + 12px) 20px 12px;
+      background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,transparent 100%);}
+    .call-peer{font-size:1.3rem;font-weight:700;}
+    .call-status{font-size:.85rem;color:rgba(255,255,255,.7);margin-top:2px;}
 
-    .call-status { color: var(--muted); font-size: 0.9rem; text-align: center; padding: 4px 0; }
+    .call-bottom{background:rgba(0,0,0,.85);backdrop-filter:blur(20px);
+      padding:12px 20px calc(24px + env(safe-area-inset-bottom,0px));}
+    .filter-row{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none;}
+    .filter-row::-webkit-scrollbar{display:none;}
+    .fpill{background:rgba(255,255,255,.1);border:none;border-radius:50px;color:var(--text);
+      cursor:pointer;flex-shrink:0;font-size:.78rem;padding:6px 14px;white-space:nowrap;
+      transition:background .15s;}
+    .fpill.on{background:var(--accent2);}
+    .ctrl-row{display:flex;justify-content:space-around;align-items:center;padding:8px 0;}
+    .ctrl{width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+      transition:transform .08s,background .15s;}
+    .ctrl:active{transform:scale(.92);}
+    .ctrl.off{background:rgba(255,255,255,.15);}
+    .ctrl.on{background:rgba(255,255,255,.35);}
+    .ctrl.hangup{background:var(--red);width:68px;height:68px;font-size:1.5rem;}
 
-    /* INCOMING */
-    .incoming-card { align-items: center; text-align: center; gap: 16px; }
-    .incoming-card .avatar { font-size: 4rem; line-height: 1; }
-    .incoming-card .caller { font-size: 2rem; font-weight: 800; color: var(--accent2); }
-    .incoming-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+    /* no-video overlay */
+    .no-video-overlay{position:absolute;inset:0;background:#1c1c1e;
+      display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;}
+    .no-video-overlay .nv-av{font-size:5rem;}
+    .no-video-overlay .nv-name{font-size:1.3rem;font-weight:700;}
   </style>
 </head>
 <body>
 
-<!-- AUTH -->
+<!-- ══ AUTH ══ -->
 <div class="screen active" id="authScreen">
-  <div class="logo-wrap">
-    <div class="emoji">📞</div>
-    <h1>Teléfono de Ñemu</h1>
-    <p>Llamadas y video gratis desde el navegador</p>
-  </div>
-  <div class="card" id="loginCard">
-    <h2>Iniciar sesión</h2>
-    <div class="msg msg-err" id="loginError"></div>
-    <div class="field">
-      <label>Tu número</label>
-      <input type="tel" id="loginNum" placeholder="ej: 1001" inputmode="numeric">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <span class="icon">📞</span>
+      <h1>Ñemu</h1>
+      <p>Llamadas y video gratis · solo web</p>
     </div>
-    <div class="field">
-      <label>Contraseña</label>
-      <input type="password" id="loginPass" placeholder="••••••">
+    <div class="auth-card" id="loginCard">
+      <h2>Iniciar sesión</h2>
+      <div class="errmsg" id="loginErr"></div>
+      <div class="field"><label>Tu número</label>
+        <input type="tel" id="loginNum" placeholder="ej: 1001" inputmode="numeric"></div>
+      <div class="field"><label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="••••••"></div>
+      <button class="btn btn-blue" onclick="login()">Entrar</button>
+      <div class="toggle">¿No tienes cuenta? <span onclick="showReg()">Regístrate gratis</span></div>
     </div>
-    <button class="btn btn-primary" id="loginBtn" onclick="login()">Entrar</button>
-    <div class="toggle-link">¿No tienes cuenta? <span onclick="showRegister()">Regístrate</span></div>
   </div>
 </div>
 
-<!-- REGISTER -->
-<div class="screen" id="registerScreen">
-  <div class="logo-wrap">
-    <div class="emoji">📞</div>
-    <h1>Teléfono de Ñemu</h1>
-    <p>Crea tu cuenta gratis</p>
-  </div>
-  <div class="card">
-    <h2>Crear cuenta</h2>
-    <div class="msg msg-err" id="registerError"></div>
-    <div class="field">
-      <label>Tu nombre</label>
-      <input type="text" id="regName" placeholder="ej: Daniel">
+<!-- ══ REGISTER ══ -->
+<div class="screen" id="regScreen">
+  <div class="auth-wrap" style="margin:auto;padding:40px 24px;">
+    <div class="auth-logo">
+      <span class="icon">📞</span>
+      <h1>Ñemu</h1>
+      <p>Crea tu cuenta gratis</p>
     </div>
-    <div class="field">
-      <label>Elige un número (solo dígitos)</label>
-      <input type="tel" id="regNum" placeholder="ej: 1001" inputmode="numeric">
+    <div class="auth-card">
+      <h2>Crear cuenta</h2>
+      <div class="errmsg" id="regErr"></div>
+      <div class="field"><label>Nombre</label>
+        <input type="text" id="regName" placeholder="ej: Daniel"></div>
+      <div class="field"><label>Número (solo dígitos)</label>
+        <input type="tel" id="regNum" placeholder="ej: 1001" inputmode="numeric"></div>
+      <div class="field"><label>Contraseña</label>
+        <input type="password" id="regPass" placeholder="••••••"></div>
+      <button class="btn btn-green" onclick="doRegister()">Crear cuenta</button>
+      <div class="toggle">¿Ya tienes cuenta? <span onclick="showLogin()">Inicia sesión</span></div>
     </div>
-    <div class="field">
-      <label>Contraseña</label>
-      <input type="password" id="regPass" placeholder="••••••">
-    </div>
-    <button class="btn btn-primary" onclick="register()">Crear cuenta</button>
-    <div class="toggle-link">¿Ya tienes cuenta? <span onclick="showLogin()">Inicia sesión</span></div>
   </div>
 </div>
 
-<!-- HOME -->
-<div class="screen" id="homeScreen">
-  <div class="top-bar">
-    <div class="user-info">
-      <span class="user-name" id="displayName">—</span>
-      <span class="user-num">
-        <span class="conn-dot" id="connDot"></span>
-        <span id="displayNum">—</span>
+<!-- ══ MAIN APP ══ -->
+<div class="screen" id="appScreen">
+  <div class="sb"></div>
+  <div class="topnav">
+    <div class="left">
+      <span class="uname" id="uName">—</span>
+      <span class="unum">
+        <span class="online-dot" id="onlineDot"></span>
+        <span id="uNum">—</span>
       </span>
     </div>
-    <button class="logout-btn" onclick="logout()">Salir</button>
-  </div>
-
-  <!-- Permission banner -->
-  <div class="perm-banner" id="permBanner">
-    ⚠️ <strong>Permisos necesarios:</strong> Para llamar necesitas permitir el acceso a la cámara y micrófono cuando el navegador lo pida. Toca "Llamar" y acepta los permisos.
-  </div>
-
-  <div class="card" style="gap:18px;">
-    <h2 style="font-size:1rem; color:var(--muted); font-weight:500;">Marca un número para llamar</h2>
-    <div class="msg msg-err" id="callError"></div>
-    <div class="number-input-wrap">
-      <input type="tel" id="dialInput" placeholder="Número del destinatario" inputmode="numeric">
-    </div>
-    <div class="call-btn-wrap">
-      <button class="btn btn-primary" onclick="startCall(false)">📞 Llamar</button>
-      <button class="btn btn-green" onclick="startCall(true)">📹 Video</button>
+    <div class="right">
+      <button class="icon-btn" onclick="logout()" title="Salir">↩</button>
     </div>
   </div>
 
-  <div class="card" style="gap:8px;">
-    <h2 style="font-size:0.85rem; color:var(--muted);">Tu número — compártelo para que te llamen</h2>
-    <div style="font-size:1.8rem; font-weight:800; color:var(--accent2); letter-spacing:4px;" id="myNumBig">—</div>
+  <!-- install banner -->
+  <div class="install-banner" id="installBanner">
+    <span style="font-size:1.8rem">📲</span>
+    <div class="ib-text">
+      <div class="ib-title">Instalar Ñemu</div>
+      <div class="ib-sub">Úsala como app, sin abrir el navegador</div>
+    </div>
+    <button class="ib-btn" onclick="doInstall()">Instalar</button>
   </div>
 
-  <button id="installBtn" class="btn btn-primary" onclick="installApp()" style="display:none; align-items:center; justify-content:center; gap:8px;">
-    📲 Instalar app en este dispositivo
-  </button>
+  <!-- notif banner -->
+  <div class="notif-banner" id="notifBanner">
+    <div class="nb-text">🔔 Activa notificaciones para saber cuándo te llaman</div>
+    <button class="nb-btn" onclick="askNotif()">Activar</button>
+  </div>
 
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" id="tabDial" onclick="switchTab('dial')">Teclado</div>
+    <div class="tab" id="tabRecents" onclick="switchTab('recents')">Recientes</div>
+    <div class="tab" id="tabMe" onclick="switchTab('me')">Mi número</div>
+  </div>
+
+  <!-- DIAL TAB -->
+  <div id="tabContentDial" style="flex:1;display:flex;flex-direction:column;">
+    <div class="dialpad-wrap">
+      <div class="dial-display">
+        <div class="dial-number" id="dialNum">&#8203;</div>
+        <div class="dial-hint">Marca un número y llama</div>
+      </div>
+      <div class="dial-errmsg" id="dialErr"></div>
+      <div class="keypad">
+        <button class="key" onclick="kp('1')"><span class="d">1</span><span class="s">&nbsp;</span></button>
+        <button class="key" onclick="kp('2')"><span class="d">2</span><span class="s">ABC</span></button>
+        <button class="key" onclick="kp('3')"><span class="d">3</span><span class="s">DEF</span></button>
+        <button class="key" onclick="kp('4')"><span class="d">4</span><span class="s">GHI</span></button>
+        <button class="key" onclick="kp('5')"><span class="d">5</span><span class="s">JKL</span></button>
+        <button class="key" onclick="kp('6')"><span class="d">6</span><span class="s">MNO</span></button>
+        <button class="key" onclick="kp('7')"><span class="d">7</span><span class="s">PQRS</span></button>
+        <button class="key" onclick="kp('8')"><span class="d">8</span><span class="s">TUV</span></button>
+        <button class="key" onclick="kp('9')"><span class="d">9</span><span class="s">WXYZ</span></button>
+        <button class="key" onclick="kp('*')"><span class="d">*</span></button>
+        <button class="key" onclick="kp('0')"><span class="d">0</span><span class="s">+</span></button>
+        <button class="key" onclick="kp('#')"><span class="d">#</span></button>
+        <!-- row 5 -->
+        <button class="key action-green" onclick="callDial(false)"><span class="d">📞</span></button>
+        <button class="key action-green" onclick="callDial(true)"><span class="d">📹</span></button>
+        <button class="key action-red" onclick="kpDel()"><span class="d">⌫</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENTS TAB -->
+  <div id="tabContentRecents" style="display:none;flex:1;flex-direction:column;">
+    <div class="recents-wrap" id="recentsList">
+      <div class="recents-empty">Sin llamadas recientes</div>
+    </div>
+  </div>
+
+  <!-- ME TAB -->
+  <div id="tabContentMe" style="display:none;flex:1;flex-direction:column;padding:16px;">
+    <div class="my-card">
+      <div class="my-avatar">👤</div>
+      <div class="my-info">
+        <div class="my-name" id="myName">—</div>
+        <div class="my-num" id="myNum">—</div>
+        <div class="share-hint">Comparte este número para que te llamen</div>
+      </div>
+    </div>
+    <button class="btn btn-gray" style="margin-top:8px;" onclick="copyNum()">📋 Copiar mi número</button>
+    <button class="btn btn-red" style="margin-top:10px;" onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <div style="height:70px;"></div><!-- spacer for bottom nav -->
 </div>
 
-<!-- INCOMING -->
+<!-- ══ INCOMING ══ -->
 <div class="screen" id="incomingScreen">
-  <div class="card incoming-card">
-    <div class="avatar">📲</div>
-    <h2>Llamada entrante de</h2>
-    <div class="caller" id="callerNum">—</div>
+  <div class="incoming-wrap">
+    <div class="incoming-avatar">👤</div>
+    <div>
+      <div class="incoming-label">Llamada entrante de</div>
+      <div class="incoming-name" id="incomingNum">—</div>
+    </div>
     <div class="incoming-btns">
-      <button class="btn btn-red" onclick="rejectCall()">❌ Rechazar</button>
-      <button class="btn btn-green" onclick="answerCall()">✅ Contestar</button>
+      <div class="incoming-col">
+        <button class="call-circle rej" onclick="rejectCall()">📵</button>
+        <span class="call-circle-label">Rechazar</span>
+      </div>
+      <div class="incoming-col">
+        <button class="call-circle ans" onclick="answerCall()">📞</button>
+        <span class="call-circle-label">Contestar</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- CALL -->
+<!-- ══ CALL ══ -->
 <div class="screen" id="callScreen">
-  <div style="display:flex; flex-direction:column; align-items:center; gap:0; width:100%;">
-    <div class="videos-wrap">
+  <div class="call-wrap">
+    <div class="videos-container">
       <video id="remoteVideo" autoplay playsinline></video>
-      <video id="localVideo"  autoplay playsinline muted></video>
+      <div class="no-video-overlay" id="noVideoOverlay">
+        <div class="nv-av">👤</div>
+        <div class="nv-name" id="noVideoName">—</div>
+      </div>
+      <video id="localVideo" autoplay playsinline muted></video>
+      <div class="call-overlay-top">
+        <div class="call-peer" id="callPeer">—</div>
+        <div class="call-status" id="callStatus">Conectando…</div>
+      </div>
     </div>
-
-    <div class="filter-bar">
-      <div class="filter-pill active" onclick="setFilter('none',this)">🎥 Normal</div>
-      <div class="filter-pill" onclick="setFilter('grayscale(100%)',this)">⬛ B&N</div>
-      <div class="filter-pill" onclick="setFilter('sepia(100%)',this)">🟫 Sepia</div>
-      <div class="filter-pill" onclick="setFilter('hue-rotate(90deg) saturate(2)',this)">🟢 Verde</div>
-      <div class="filter-pill" onclick="setFilter('hue-rotate(200deg) saturate(2)',this)">🔵 Azul</div>
-      <div class="filter-pill" onclick="setFilter('invert(100%)',this)">🔄 Invertir</div>
-      <div class="filter-pill" onclick="setFilter('contrast(2) brightness(0.8)',this)">🎞️ Cine</div>
-      <div class="filter-pill" onclick="setFilter('saturate(3)',this)">🌈 Vívido</div>
-      <div class="filter-pill" onclick="setFilter('blur(2px)',this)">🌫️ Blur</div>
-    </div>
-
-    <div class="call-status" id="callStatus">Conectando…</div>
-
-    <div class="call-controls">
-      <button class="ctrl-btn mute" id="muteBtn" onclick="toggleMute()">🎙️</button>
-      <button class="ctrl-btn hangup" onclick="hangup()">📵</button>
-      <button class="ctrl-btn cam"  id="camBtn"  onclick="toggleCam()">📷</button>
+    <div class="call-bottom">
+      <div class="filter-row">
+        <button class="fpill on" onclick="setF('none',this)">🎥 Normal</button>
+        <button class="fpill" onclick="setF('grayscale(100%)',this)">⬛ B&N</button>
+        <button class="fpill" onclick="setF('sepia(100%)',this)">🟫 Sepia</button>
+        <button class="fpill" onclick="setF('hue-rotate(90deg) saturate(2)',this)">🟢 Verde</button>
+        <button class="fpill" onclick="setF('hue-rotate(200deg) saturate(2)',this)">🔵 Azul</button>
+        <button class="fpill" onclick="setF('invert(100%)',this)">🔄 Invertir</button>
+        <button class="fpill" onclick="setF('contrast(2) brightness(.8)',this)">🎞️ Cine</button>
+        <button class="fpill" onclick="setF('saturate(3)',this)">🌈 Vívido</button>
+        <button class="fpill" onclick="setF('blur(2px)',this)">🌫️ Blur</button>
+        <button class="fpill" onclick="setF('brightness(1.3) contrast(1.2)',this)">✨ Brillo</button>
+      </div>
+      <div class="ctrl-row">
+        <button class="ctrl off" id="btnMute" onclick="toggleMute()">🎙️</button>
+        <button class="ctrl hangup" onclick="hangup()">📵</button>
+        <button class="ctrl off" id="btnCam" onclick="toggleCam()">📷</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
-// ── STORAGE ──
-var USERS_KEY = 'nemu_users';
-var SESSION_KEY = 'nemu_session';
+// ══ STORAGE ══
+var UK = 'nemu_users', SK = 'nemu_session', RK = 'nemu_recents';
+var getU = function(){ try{return JSON.parse(localStorage.getItem(UK)||'{}')}catch(e){return{}} };
+var setU = function(u){ localStorage.setItem(UK,JSON.stringify(u)) };
+var getSess = function(){ try{return JSON.parse(localStorage.getItem(SK))}catch(e){return null} };
+var setSess = function(s){ localStorage.setItem(SK,JSON.stringify(s)) };
+var clrSess = function(){ localStorage.removeItem(SK) };
+var getR = function(){ try{return JSON.parse(localStorage.getItem(RK)||'[]')}catch(e){return[]} };
+var setR = function(r){ localStorage.setItem(RK,JSON.stringify(r.slice(0,50))) };
 
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch(e) { return {}; }
-}
-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
-function getSession() {
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch(e) { return null; }
-}
-function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
-function clearSession() { localStorage.removeItem(SESSION_KEY); }
+// ══ STATE ══
+var peer=null, localStream=null, currentCall=null, pendingCall=null;
+var muted=false, camOff=false, callNum='', deferredPrompt=null;
+var currentUser=null;
 
-// ── UI ──
-function show(id) {
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+// ══ UI ══
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
   document.getElementById(id).classList.add('active');
 }
-function showMsg(id, text, type) {
-  var el = document.getElementById(id);
-  el.className = 'msg msg-' + (type || 'err');
-  el.textContent = text;
-  el.style.display = 'block';
-}
-function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
-function showLogin() { show('authScreen'); hideMsg('loginError'); }
-function showRegister() { show('registerScreen'); hideMsg('registerError'); }
+function showLogin(){ show('authScreen'); hide('loginErr'); }
+function showReg(){ show('regScreen'); hide('regErr'); }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function err(id,msg){ var e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
 
-// ── CHECK PERMISSIONS ──
-function checkPermissions() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    document.getElementById('permBanner').style.display = 'block';
-    document.getElementById('permBanner').textContent = '❌ Tu navegador no soporta cámara/micrófono. Usa Chrome o Firefox.';
-    return;
-  }
-  navigator.permissions && navigator.permissions.query({name:'camera'}).then(function(r){
-    if (r.state === 'denied') {
-      document.getElementById('permBanner').style.display = 'block';
-      document.getElementById('permBanner').innerHTML = '❌ <strong>Cámara bloqueada.</strong> Ve a la configuración de tu navegador y permite el acceso a cámara y micrófono para este sitio.';
-    } else if (r.state === 'prompt') {
-      document.getElementById('permBanner').style.display = 'block';
-    }
-  }).catch(function(){
-    document.getElementById('permBanner').style.display = 'block';
+// ══ TABS ══
+var currentTab = 'dial';
+function switchTab(t){
+  currentTab = t;
+  ['dial','recents','me'].forEach(function(x){
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===t);
+    document.getElementById('tabContent'+x.charAt(0).toUpperCase()+x.slice(1)).style.display = x===t ? 'flex' : 'none';
   });
+  if(t==='recents') renderRecents();
 }
 
-// ── AUTH ──
-function register() {
-  var name = document.getElementById('regName').value.trim();
-  var num  = document.getElementById('regNum').value.trim();
-  var pass = document.getElementById('regPass').value;
-  hideMsg('registerError');
-  if (!name || !num || !pass) { showMsg('registerError','Completa todos los campos'); return; }
-  if (!/^\d+$/.test(num))     { showMsg('registerError','El número solo debe tener dígitos'); return; }
-  var users = getUsers();
-  if (users[num])             { showMsg('registerError','Ese número ya está en uso, elige otro'); return; }
-  users[num] = { name: name, pass: pass };
-  saveUsers(users);
-  saveSession({ num: num, name: name });
-  enterHome(num, name);
+// ══ KEYPAD ══
+var dialStr='';
+function kp(d){ if(dialStr.length>=15)return; dialStr+=d; document.getElementById('dialNum').textContent=dialStr||'\u200B'; }
+function kpDel(){ dialStr=dialStr.slice(0,-1); document.getElementById('dialNum').textContent=dialStr||'\u200B'; }
+function callDial(video){ startCall(dialStr, video); }
+
+// ══ AUTH ══
+function doRegister(){
+  var name=document.getElementById('regName').value.trim();
+  var num=document.getElementById('regNum').value.trim();
+  var pass=document.getElementById('regPass').value;
+  hide('regErr');
+  if(!name||!num||!pass){err('regErr','Completa todos los campos');return;}
+  if(!/^\d+$/.test(num)){err('regErr','El número solo debe tener dígitos');return;}
+  var u=getU();
+  if(u[num]){err('regErr','Ese número ya existe, elige otro');return;}
+  u[num]={name:name,pass:pass};
+  setU(u);
+  setSess({num:num,name:name});
+  enterApp(num,name);
 }
 
-function login() {
-  var num  = document.getElementById('loginNum').value.trim();
-  var pass = document.getElementById('loginPass').value;
-  hideMsg('loginError');
-  var users = getUsers();
-  if (!users[num] || users[num].pass !== pass) {
-    showMsg('loginError','Número o contraseña incorrectos'); return;
-  }
-  saveSession({ num: num, name: users[num].name });
-  enterHome(num, users[num].name);
+function login(){
+  var num=document.getElementById('loginNum').value.trim();
+  var pass=document.getElementById('loginPass').value;
+  hide('loginErr');
+  var u=getU();
+  if(!u[num]||u[num].pass!==pass){err('loginErr','Número o contraseña incorrectos');return;}
+  setSess({num:num,name:u[num].name});
+  enterApp(num,u[num].name);
 }
 
-function logout() {
-  if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
-  clearSession();
-  showLogin();
+function logout(){
+  if(peer){try{peer.destroy()}catch(e){} peer=null;}
+  clrSess(); showLogin();
 }
 
-// ── HOME ──
-function enterHome(num, name) {
-  document.getElementById('displayName').textContent = name;
-  document.getElementById('displayNum').textContent  = num;
-  document.getElementById('myNumBig').textContent    = num;
+// ══ ENTER APP ══
+function enterApp(num,name){
+  currentUser={num:num,name:name};
+  document.getElementById('uName').textContent=name;
+  document.getElementById('uNum').textContent=num;
+  document.getElementById('myName').textContent=name;
+  document.getElementById('myNum').textContent=num;
+  show('appScreen');
+  switchTab('dial');
   initPeer(num);
-  checkPermissions();
-  show('homeScreen');
+  checkBanners();
 }
 
-// ── PEERJS ──
-var peer = null;
-var localStream = null;
-var currentCall = null;
-var pendingCall = null;
-var muted = false;
-var camOff = false;
+function copyNum(){
+  var n=currentUser?currentUser.num:'';
+  if(navigator.clipboard){navigator.clipboard.writeText(n);}
+  var b=document.getElementById('myNum');
+  b.textContent='✅ Copiado!';
+  setTimeout(function(){b.textContent=currentUser.num;},1500);
+}
 
-function initPeer(num) {
-  if (peer) { try { peer.destroy(); } catch(e){} }
-  var dot = document.getElementById('connDot');
-
-  peer = new Peer('nemu-' + num, {
-    host: '0.peerjs.com', port: 443, path: '/', secure: true,
-    config: {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        {
-          urls: 'turn:openrelay.metered.ca:80',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        }
-      ]
-    }
+// ══ PEERJS ══
+function initPeer(num){
+  if(peer){try{peer.destroy()}catch(e){}}
+  var dot=document.getElementById('onlineDot');
+  peer=new Peer('nemu-'+num,{
+    host:'0.peerjs.com',port:443,path:'/',secure:true,
+    config:{iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:stun2.l.google.com:19302'},
+      {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}
+    ]}
   });
-
-  peer.on('open', function(id) {
-    dot.classList.add('online');
-  });
-
-  peer.on('disconnected', function() {
-    dot.classList.remove('online');
-    setTimeout(function(){ if(peer) peer.reconnect(); }, 3000);
-  });
-
-  peer.on('call', function(call) {
-    pendingCall = call;
-    document.getElementById('callerNum').textContent = call.peer.replace('nemu-','');
+  peer.on('open',function(){ dot.classList.add('on'); });
+  peer.on('disconnected',function(){ dot.classList.remove('on'); setTimeout(function(){if(peer)peer.reconnect();},3000); });
+  peer.on('call',function(call){
+    pendingCall=call;
+    callNum=call.peer.replace('nemu-','');
+    document.getElementById('incomingNum').textContent=callNum;
     show('incomingScreen');
+    vibrateIncoming();
+    sendNotif('📲 Llamada de '+callNum,'Toca para contestar en Ñemu');
   });
-
-  peer.on('error', function(err) {
-    console.error('PeerJS error:', err.type, err);
-    if (err.type === 'peer-unavailable') {
-      showMsg('callError', 'Ese número no está conectado o no existe.'); return;
-    }
-    showMsg('callError', 'Error de conexión: ' + err.type);
-    show('homeScreen');
+  peer.on('error',function(e){
+    if(e.type==='peer-unavailable'){setDialErr('El número '+dialStr+' no está conectado.');return;}
+    setDialErr('Error: '+e.type);
+    show('appScreen');
   });
 }
 
-function getMedia(video, callback) {
-  var constraints = { audio: true, video: video };
-  navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-    callback(null, stream);
-  }).catch(function(err) {
-    var msg = 'No se pudo acceder a la cámara/micrófono.';
-    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-      msg = '❌ Permiso denegado. Toca el candado en la barra del navegador y permite cámara y micrófono.';
-    } else if (err.name === 'NotFoundError') {
-      msg = '❌ No se encontró cámara o micrófono en este dispositivo.';
-    } else if (err.name === 'NotReadableError') {
-      msg = '❌ La cámara está siendo usada por otra app. Ciérrala e intenta de nuevo.';
-    }
-    callback(msg, null);
-  });
+function setDialErr(msg){
+  var el=document.getElementById('dialErr');
+  el.textContent=msg;
+  setTimeout(function(){el.textContent='';},4000);
 }
 
-function startCall(video) {
-  hideMsg('callError');
-  var dest = document.getElementById('dialInput').value.trim();
-  if (!dest) { showMsg('callError','Escribe el número al que quieres llamar'); return; }
-  if (!peer || !peer.open) { showMsg('callError','Aún conectando… espera un momento'); return; }
-
-  getMedia(video, function(err, stream) {
-    if (err) { showMsg('callError', err); return; }
-    localStream = stream;
-    document.getElementById('localVideo').srcObject = stream;
-    show('callScreen');
-    document.getElementById('callStatus').textContent = 'Llamando a ' + dest + '…';
-
-    var call = peer.call('nemu-' + dest, stream);
-    currentCall = call;
-
-    var answered = false;
-    var timeout = setTimeout(function() {
-      if (!answered) {
-        hangup();
-        show('homeScreen');
-        showMsg('callError', 'No contestó o el número no está conectado.');
-      }
-    }, 30000);
-
-    call.on('stream', function(remoteStream) {
-      answered = true;
-      clearTimeout(timeout);
-      var rv = document.getElementById('remoteVideo');
-      rv.srcObject = remoteStream;
-      rv.muted = false;
-      rv.volume = 1.0;
-      rv.play().catch(function(){});
-      document.getElementById('callStatus').textContent = 'En llamada ✅';
+// ══ MEDIA ══
+function getMedia(video,cb){
+  navigator.mediaDevices.getUserMedia({audio:true,video:video})
+    .then(function(s){cb(null,s)})
+    .catch(function(e){
+      var m='No se pudo acceder a la cámara/micrófono.';
+      if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError')
+        m='Permiso denegado. Toca el candado en el navegador y permite cámara y micrófono.';
+      else if(e.name==='NotFoundError') m='No se encontró cámara o micrófono.';
+      else if(e.name==='NotReadableError') m='La cámara está en uso por otra app.';
+      cb(m,null);
     });
-    call.on('close', function() { clearTimeout(timeout); endCallUI(); });
-    call.on('error', function(e) {
-      clearTimeout(timeout);
-      show('homeScreen');
-      showMsg('callError', 'Error durante la llamada.');
+}
+
+// ══ CALLS ══
+function startCall(dest, video){
+  if(!dest){setDialErr('Marca un número primero');return;}
+  if(!peer||!peer.open){setDialErr('Conectando… espera un momento');return;}
+  getMedia(video,function(e,stream){
+    if(e){setDialErr(e);return;}
+    localStream=stream;
+    document.getElementById('localVideo').srcObject=stream;
+    showCallScreen(dest, video);
+    document.getElementById('callStatus').textContent='Llamando…';
+    var call=peer.call('nemu-'+dest,stream);
+    currentCall=call;
+    var answered=false;
+    var t=setTimeout(function(){
+      if(!answered){hangup();setDialErr('No contestó o el número no está conectado.');}
+    },30000);
+    call.on('stream',function(rs){
+      answered=true; clearTimeout(t);
+      setRemoteStream(rs);
+      document.getElementById('callStatus').textContent='En llamada ✅';
+      addRecent(dest,'out');
     });
+    call.on('close',function(){clearTimeout(t);endCallUI();});
+    call.on('error',function(){clearTimeout(t);endCallUI();setDialErr('Error de conexión.');});
   });
 }
 
-function answerCall() {
-  if (!pendingCall) return;
-  var call = pendingCall; pendingCall = null;
-  getMedia(true, function(err, stream) {
-    if (err) { show('homeScreen'); showMsg('callError', err); return; }
-    localStream = stream;
-    document.getElementById('localVideo').srcObject = stream;
+function answerCall(){
+  if(!pendingCall)return;
+  var call=pendingCall; pendingCall=null;
+  getMedia(true,function(e,stream){
+    if(e){show('appScreen');setDialErr(e);return;}
+    localStream=stream;
+    document.getElementById('localVideo').srcObject=stream;
     call.answer(stream);
-    currentCall = call;
-    show('callScreen');
-    document.getElementById('callStatus').textContent = 'En llamada ✅';
-    call.on('stream', function(remoteStream) {
-      var rv = document.getElementById('remoteVideo');
-      rv.srcObject = remoteStream;
-      rv.muted = false;
-      rv.volume = 1.0;
-      rv.play().catch(function(){});
-      document.getElementById('callStatus').textContent = 'En llamada ✅';
+    currentCall=call;
+    showCallScreen(callNum, true);
+    document.getElementById('callStatus').textContent='En llamada ✅';
+    call.on('stream',function(rs){
+      setRemoteStream(rs);
+      addRecent(callNum,'in');
     });
-    call.on('close', function() { endCallUI(); });
+    call.on('close',function(){endCallUI();});
   });
 }
 
-function rejectCall() {
-  if (pendingCall) { try { pendingCall.close(); } catch(e){} pendingCall = null; }
-  show('homeScreen');
+function rejectCall(){
+  if(pendingCall){try{pendingCall.close()}catch(e){} pendingCall=null;}
+  show('appScreen');
 }
 
-function hangup() {
-  if (currentCall) { try { currentCall.close(); } catch(e){} currentCall = null; }
+function showCallScreen(num, video){
+  document.getElementById('callPeer').textContent=num;
+  document.getElementById('noVideoName').textContent=num;
+  document.getElementById('noVideoOverlay').style.display = video ? 'none' : 'flex';
+  show('callScreen');
+}
+
+function setRemoteStream(rs){
+  var rv=document.getElementById('remoteVideo');
+  rv.srcObject=rs;
+  rv.muted=false;
+  rv.volume=1.0;
+  rv.play().catch(function(){});
+  // show no-video overlay if no video tracks
+  var hasVideo=rs.getVideoTracks().length>0;
+  document.getElementById('noVideoOverlay').style.display=hasVideo?'none':'flex';
+}
+
+function hangup(){
+  if(currentCall){try{currentCall.close()}catch(e){} currentCall=null;}
   stopStream();
   endCallUI();
 }
 
-function stopStream() {
-  if (localStream) { localStream.getTracks().forEach(function(t){ t.stop(); }); localStream = null; }
+function stopStream(){
+  if(localStream){localStream.getTracks().forEach(function(t){t.stop()});localStream=null;}
 }
 
-function endCallUI() {
-  document.getElementById('remoteVideo').srcObject = null;
-  document.getElementById('localVideo').srcObject  = null;
-  document.querySelectorAll('.filter-pill').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelector('.filter-pill').classList.add('active');
-  document.getElementById('localVideo').style.filter = 'none';
-  muted = false; camOff = false;
-  document.getElementById('muteBtn').textContent = '🎙️';
-  document.getElementById('camBtn').textContent  = '📷';
-  show('homeScreen');
+function endCallUI(){
+  document.getElementById('remoteVideo').srcObject=null;
+  document.getElementById('localVideo').srcObject=null;
+  document.getElementById('localVideo').style.filter='none';
+  document.querySelectorAll('.fpill').forEach(function(p){p.classList.remove('on')});
+  document.querySelector('.fpill').classList.add('on');
+  muted=false; camOff=false;
+  document.getElementById('btnMute').textContent='🎙️';
+  document.getElementById('btnCam').textContent='📷';
+  show('appScreen');
 }
 
 // ── CONTROLS ──
-function toggleMute() {
-  if (!localStream) return;
-  muted = !muted;
-  localStream.getAudioTracks().forEach(function(t){ t.enabled = !muted; });
-  document.getElementById('muteBtn').textContent = muted ? '🔇' : '🎙️';
+function toggleMute(){
+  if(!localStream)return;
+  muted=!muted;
+  localStream.getAudioTracks().forEach(function(t){t.enabled=!muted});
+  var b=document.getElementById('btnMute');
+  b.textContent=muted?'🔇':'🎙️';
+  b.className='ctrl '+(muted?'on':'off');
 }
-
-function toggleCam() {
-  if (!localStream) return;
-  camOff = !camOff;
-  localStream.getVideoTracks().forEach(function(t){ t.enabled = !camOff; });
-  document.getElementById('camBtn').textContent = camOff ? '🚫' : '📷';
+function toggleCam(){
+  if(!localStream)return;
+  camOff=!camOff;
+  localStream.getVideoTracks().forEach(function(t){t.enabled=!camOff});
+  var b=document.getElementById('btnCam');
+  b.textContent=camOff?'🚫':'📷';
+  b.className='ctrl '+(camOff?'on':'off');
 }
 
 // ── FILTERS ──
-function setFilter(filter, el) {
-  document.getElementById('localVideo').style.filter = filter;
-  document.querySelectorAll('.filter-pill').forEach(function(p){ p.classList.remove('active'); });
-  if (el) el.classList.add('active');
+function setF(f,el){
+  document.getElementById('localVideo').style.filter=f;
+  document.querySelectorAll('.fpill').forEach(function(p){p.classList.remove('on')});
+  if(el)el.classList.add('on');
 }
 
-// ── SERVICE WORKER (PWA) ──
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
+// ── RECENTS ──
+function addRecent(num, dir){
+  var r=getR();
+  r.unshift({num:num,dir:dir,time:Date.now()});
+  setR(r);
+}
+function renderRecents(){
+  var r=getR();
+  var wrap=document.getElementById('recentsList');
+  if(!r.length){wrap.innerHTML='<div class="recents-empty">Sin llamadas recientes</div>';return;}
+  wrap.innerHTML='';
+  r.forEach(function(item){
+    var d=new Date(item.time);
+    var t=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+    var icon=item.dir==='in'?'📲':'📞';
+    var div=document.createElement('div');
+    div.className='recent-item';
+    div.innerHTML='<div class="recent-avatar">'+icon+'</div>'+
+      '<div class="recent-info"><div class="recent-name">'+item.num+'</div>'+
+      '<div class="recent-time">'+(item.dir==='in'?'Entrante':'Saliente')+' · '+t+'</div></div>'+
+      '<div class="recent-call-btn" onclick="startCallRecent(\''+item.num+'\')">📞</div>';
+    wrap.appendChild(div);
+  });
+}
+function startCallRecent(num){
+  dialStr=num;
+  document.getElementById('dialNum').textContent=num;
+  switchTab('dial');
+  startCall(num,false);
+}
+
+// ── NOTIFICATIONS ──
+function sendNotif(title,body){
+  if('Notification' in window && Notification.permission==='granted'){
+    try{new Notification(title,{body:body,icon:'icon-192.png'});}catch(e){}
+  }
+}
+function askNotif(){
+  if(!('Notification' in window)){hide('notifBanner');return;}
+  Notification.requestPermission().then(function(p){
+    if(p==='granted') hide('notifBanner');
+  });
+}
+
+// ── VIBRATE ──
+function vibrateIncoming(){
+  if(navigator.vibrate){
+    var i=setInterval(function(){
+      if(document.getElementById('incomingScreen').classList.contains('active')){
+        navigator.vibrate([500,300,500]);
+      } else { clearInterval(i); }
+    },1400);
+  }
+}
+
+// ── INSTALL PWA ──
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('installBanner').style.display='flex';
+});
+window.addEventListener('appinstalled',function(){
+  document.getElementById('installBanner').style.display='none';
+});
+function doInstall(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;});}
+}
+
+// ── BANNERS ──
+function checkBanners(){
+  if('Notification' in window && Notification.permission==='default'){
+    document.getElementById('notifBanner').style.display='flex';
+  }
+}
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
     navigator.serviceWorker.register('/telefono-nemu/sw.js').catch(function(){});
   });
 }
 
-// ── INSTALL PROMPT ──
-var deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  deferredPrompt = e;
-  var btn = document.getElementById('installBtn');
-  if (btn) btn.style.display = 'flex';
-});
-
-window.addEventListener('appinstalled', function() {
-  var btn = document.getElementById('installBtn');
-  if (btn) btn.style.display = 'none';
-});
-
-function installApp() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
-  }
-}
-
 // ── INIT ──
-(function() {
-  var session = getSession();
-  if (session && session.num) {
-    enterHome(session.num, session.name);
-  }
+(function(){
+  var s=getSess();
+  if(s&&s.num){ enterApp(s.num,s.name); }
 })();
 </script>
 </body>
