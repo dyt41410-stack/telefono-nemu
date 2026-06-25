@@ -1,1 +1,215 @@
-test
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ñemu</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ñemu">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ══ AUTH ══ -->
+<div class="screen active" id="authScreen">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <span class="icon">📞</span>
+      <h1>Ñemu</h1>
+      <p>Llamadas y video gratis · solo web</p>
+    </div>
+    <div class="auth-card" id="loginCard">
+      <h2>Iniciar sesión</h2>
+      <div class="errmsg" id="loginErr"></div>
+      <div class="field"><label>Tu número</label>
+        <input type="tel" id="loginNum" placeholder="ej: 1001" inputmode="numeric"></div>
+      <div class="field"><label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="••••••"></div>
+      <button class="btn btn-blue" onclick="login()">Entrar</button>
+      <div class="toggle">¿No tienes cuenta? <span onclick="showReg()">Regístrate gratis</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REGISTER ══ -->
+<div class="screen" id="regScreen">
+  <div class="auth-wrap" style="margin:auto;padding:40px 24px;">
+    <div class="auth-logo">
+      <span class="icon">📞</span>
+      <h1>Ñemu</h1>
+      <p>Crea tu cuenta gratis</p>
+    </div>
+    <div class="auth-card">
+      <h2>Crear cuenta</h2>
+      <div class="errmsg" id="regErr"></div>
+      <div class="field"><label>Nombre</label>
+        <input type="text" id="regName" placeholder="ej: Daniel"></div>
+      <div class="field"><label>Número (solo dígitos)</label>
+        <input type="tel" id="regNum" placeholder="ej: 1001" inputmode="numeric"></div>
+      <div class="field"><label>Contraseña</label>
+        <input type="password" id="regPass" placeholder="••••••"></div>
+      <button class="btn btn-green" onclick="doRegister()">Crear cuenta</button>
+      <div class="toggle">¿Ya tienes cuenta? <span onclick="showLogin()">Inicia sesión</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div class="screen" id="appScreen">
+  <div class="sb"></div>
+  <div class="topnav">
+    <div class="left">
+      <span class="uname" id="uName">—</span>
+      <span class="unum">
+        <span class="online-dot" id="onlineDot"></span>
+        <span id="uNum">—</span>
+      </span>
+    </div>
+    <div class="right">
+      <button class="icon-btn" onclick="logout()" title="Salir">↩</button>
+    </div>
+  </div>
+
+  <!-- install banner -->
+  <div class="install-banner" id="installBanner">
+    <span style="font-size:1.8rem">📲</span>
+    <div class="ib-text">
+      <div class="ib-title">Instalar Ñemu</div>
+      <div class="ib-sub">Úsala como app, sin abrir el navegador</div>
+    </div>
+    <button class="ib-btn" onclick="doInstall()">Instalar</button>
+  </div>
+
+  <!-- notif banner -->
+  <div class="notif-banner" id="notifBanner">
+    <div class="nb-text">🔔 Activa notificaciones para saber cuándo te llaman</div>
+    <button class="nb-btn" onclick="askNotif()">Activar</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" id="tabDial" onclick="switchTab('dial')">Teclado</div>
+    <div class="tab" id="tabRecents" onclick="switchTab('recents')">Recientes</div>
+    <div class="tab" id="tabMe" onclick="switchTab('me')">Mi número</div>
+  </div>
+
+  <!-- DIAL TAB -->
+  <div id="tabContentDial" style="flex:1;display:flex;flex-direction:column;">
+    <div class="dialpad-wrap">
+      <div class="dial-display">
+        <div class="dial-number" id="dialNum">&#8203;</div>
+        <div class="dial-hint">Marca un número y llama</div>
+      </div>
+      <div class="dial-errmsg" id="dialErr"></div>
+      <div class="keypad">
+        <button class="key" onclick="kp('1')"><span class="d">1</span><span class="s">&nbsp;</span></button>
+        <button class="key" onclick="kp('2')"><span class="d">2</span><span class="s">ABC</span></button>
+        <button class="key" onclick="kp('3')"><span class="d">3</span><span class="s">DEF</span></button>
+        <button class="key" onclick="kp('4')"><span class="d">4</span><span class="s">GHI</span></button>
+        <button class="key" onclick="kp('5')"><span class="d">5</span><span class="s">JKL</span></button>
+        <button class="key" onclick="kp('6')"><span class="d">6</span><span class="s">MNO</span></button>
+        <button class="key" onclick="kp('7')"><span class="d">7</span><span class="s">PQRS</span></button>
+        <button class="key" onclick="kp('8')"><span class="d">8</span><span class="s">TUV</span></button>
+        <button class="key" onclick="kp('9')"><span class="d">9</span><span class="s">WXYZ</span></button>
+        <button class="key" onclick="kp('*')"><span class="d">*</span></button>
+        <button class="key" onclick="kp('0')"><span class="d">0</span><span class="s">+</span></button>
+        <button class="key" onclick="kp('#')"><span class="d">#</span></button>
+        <!-- row 5 -->
+        <button class="key action-green" onclick="callDial(false)"><span class="d">📞</span></button>
+        <button class="key action-green" onclick="callDial(true)"><span class="d">📹</span></button>
+        <button class="key action-red" onclick="kpDel()"><span class="d">⌫</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENTS TAB -->
+  <div id="tabContentRecents" style="display:none;flex:1;flex-direction:column;">
+    <div class="recents-wrap" id="recentsList">
+      <div class="recents-empty">Sin llamadas recientes</div>
+    </div>
+  </div>
+
+  <!-- ME TAB -->
+  <div id="tabContentMe" style="display:none;flex:1;flex-direction:column;padding:16px;">
+    <div class="my-card">
+      <div class="my-avatar">👤</div>
+      <div class="my-info">
+        <div class="my-name" id="myName">—</div>
+        <div class="my-num" id="myNum">—</div>
+        <div class="share-hint">Comparte este número para que te llamen</div>
+      </div>
+    </div>
+    <button class="btn btn-gray" style="margin-top:8px;" onclick="copyNum()">📋 Copiar mi número</button>
+    <button class="btn btn-red" style="margin-top:10px;" onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <div style="height:70px;"></div><!-- spacer for bottom nav -->
+</div>
+
+<!-- ══ INCOMING ══ -->
+<div class="screen" id="incomingScreen">
+  <div class="incoming-wrap">
+    <div class="incoming-avatar">👤</div>
+    <div>
+      <div class="incoming-label">Llamada entrante de</div>
+      <div class="incoming-name" id="incomingNum">—</div>
+    </div>
+    <div class="incoming-btns">
+      <div class="incoming-col">
+        <button class="call-circle rej" onclick="rejectCall()">📵</button>
+        <span class="call-circle-label">Rechazar</span>
+      </div>
+      <div class="incoming-col">
+        <button class="call-circle ans" onclick="answerCall()">📞</button>
+        <span class="call-circle-label">Contestar</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CALL ══ -->
+<div class="screen" id="callScreen">
+  <div class="call-wrap">
+    <div class="videos-container">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <div class="no-video-overlay" id="noVideoOverlay">
+        <div class="nv-av">👤</div>
+        <div class="nv-name" id="noVideoName">—</div>
+      </div>
+      <video id="localVideo" autoplay playsinline muted></video>
+      <div class="call-overlay-top">
+        <div class="call-peer" id="callPeer">—</div>
+        <div class="call-status" id="callStatus">Conectando…</div>
+      </div>
+    </div>
+    <div class="call-bottom">
+      <div class="filter-row">
+        <button class="fpill on" onclick="setF('none',this)">🎥 Normal</button>
+        <button class="fpill" onclick="setF('grayscale(100%)',this)">⬛ B&N</button>
+        <button class="fpill" onclick="setF('sepia(100%)',this)">🟫 Sepia</button>
+        <button class="fpill" onclick="setF('hue-rotate(90deg) saturate(2)',this)">🟢 Verde</button>
+        <button class="fpill" onclick="setF('hue-rotate(200deg) saturate(2)',this)">🔵 Azul</button>
+        <button class="fpill" onclick="setF('invert(100%)',this)">🔄 Invertir</button>
+        <button class="fpill" onclick="setF('contrast(2) brightness(.8)',this)">🎞️ Cine</button>
+        <button class="fpill" onclick="setF('saturate(3)',this)">🌈 Vívido</button>
+        <button class="fpill" onclick="setF('blur(2px)',this)">🌫️ Blur</button>
+        <button class="fpill" onclick="setF('brightness(1.3) contrast(1.2)',this)">✨ Brillo</button>
+      </div>
+      <div class="ctrl-row">
+        <button class="ctrl off" id="btnMute" onclick="toggleMute()">🎙️</button>
+        <button class="ctrl hangup" onclick="hangup()">📵</button>
+        <button class="ctrl off" id="btnCam" onclick="toggleCam()">📷</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
